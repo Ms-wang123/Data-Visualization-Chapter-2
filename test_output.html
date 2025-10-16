@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>æ°æ®å¯è§åå±ç¤ºå¹³å°</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>æ°æ®å¯è§åå±ç¤º</h1>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link active">é¦é¡µ</a></li>
+                <li><a href="#charts" class="nav-link">å¾è¡¨å±ç¤º</a></li>
+                <li><a href="#interactive" class="nav-link">äº¤äºåè½</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="section active">
+            <div class="hero">
+                <h2>æ°æ®å¯è§åå±ç¤ºå¹³å°</h2>
+                <p>åºäºç¬¬2ç« .ipynbçå¯è§åå¾è¡¨å®ç°</p>
+                <button class="cta-button" onclick="showSection('charts')">å¼å§æ¢ç´¢</button>
+            </div>
+        </section>
+
+        <section id="charts" class="section">
+            <div class="container">
+                <h2>å¯è§åå¾è¡¨å±ç¤º</h2>
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="chartType">éæ©å¾è¡¨ç±»å:</label>
+                        <select id="chartType" onchange="updateChart()">
+                            <option value="line">æçº¿å¾</option>
+                            <option value="bar">æ±å½¢å¾</option>
+                            <option value="horizontalBar">æ¡å½¢å¾</option>
+                            <option value="area">é¢ç§¯å¾</option>
+                            <option value="histogram">ç´æ¹å¾</option>
+                            <option value="pie">é¥¼å¾</option>
+                            <option value="scatter">æ£ç¹å¾</option>
+                            <option value="box">ç®±å½¢å¾</option>
+                            <option value="radar">é·è¾¾å¾</option>
+                            <option value="error">è¯¯å·®æ£å¾</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <button onclick="randomizeData()" class="btn">éæºæ°æ®</button>
+                        <button onclick="resetData()" class="btn">éç½®æ°æ®</button>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+
+                <div class="chart-info">
+                    <h3 id="chartTitle">æçº¿å¾</h3>
+                    <p id="chartDescription">å±ç¤ºæ°æ®éæ¶é´ååçè¶å¿</p>
+                    <div class="data-table">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>æ°æ®ç¹</th>
+                                    <th>æ°å¼</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="interactive" class="section">
+            <div class="container">
+                <h2>äº¤äºåè½æ¼ç¤º</h2>
+                <div class="interactive-grid">
+                    <div class="interactive-card" onmouseover="showTooltip(this, 'hover')" onmouseout="hideTooltip()">
+                        <h3>æ¬åææ</h3>
+                        <p>é¼ æ æ¬åæ¥çè¯¦ç»ä¿¡æ¯</p>
+                        <div class="tooltip">è¿æ¯ä¸ä¸ªæ¬åæç¤ºæ¡</div>
+                    </div>
+                    
+                    <div class="interactive-card" onclick="toggleDetails(this)">
+                        <h3>ç¹å»å±å¼</h3>
+                        <p>ç¹å»æ¥çè¯¦ç»åå®¹</p>
+                        <div class="details">
+                            <p>è¿æ¯è¯¦ç»åå®¹åºåï¼æ¯æå¨ææ¾ç¤ºåéèã</p>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-card">
+                        <h3>å¨ææ´æ°</h3>
+                        <p>å®æ¶æ°æ®åå</p>
+                        <div class="live-data">
+                            <span id="liveValue">0</span>
+                            <button onclick="startLiveUpdate()">å¼å§æ´æ°</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 æ°æ®å¯è§åå±ç¤ºå¹³å° - åºäºç¬¬2ç« .ipynb</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

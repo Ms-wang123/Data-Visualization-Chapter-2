@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级交互平台</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- 侧边栏 -->
+        <nav id="sidebar" class="active">
+            <div class="sidebar-header">
+                <h3>高级交互平台</h3>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#" data-page="dashboard">
+                        <i class="fas fa-home"></i> 仪表盘
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="todo">
+                        <i class="fas fa-tasks"></i> 待办事项
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="weather">
+                        <i class="fas fa-cloud-sun"></i> 天气查询
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="drag-drop">
+                        <i class="fas fa-grip-horizontal"></i> 拖放演示
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="chat">
+                        <i class="fas fa-comments"></i> 聊天室
+                    </a>
+                </li>
+                <li>
+                    <a href="#" data-page="visualization">
+                        <i class="fas fa-chart-bar"></i> 数据可视化
+                    </a>
+                </li>
+            </ul>
+
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider round"></div>
+                </label>
+                <em>切换暗模式</em>
+            </div>
+        </nav>
+
+        <!-- 页面内容 -->
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-info">
+                        <i class="fas fa-align-left"></i>
+                        <span>切换侧边栏</span>
+                    </button>
+                    <div class="d-flex">
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="#">个人资料</a></li>
+                                <li><a class="dropdown-item" href="#">设置</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">退出</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- 仪表盘页面 -->
+            <div class="page-content" id="dashboard-page">
+                <div class="container-fluid">
+                    <h2 class="mt-4">仪表盘</h2>
+                    <p>欢迎使用高级交互平台！这是一个功能丰富的网页应用示例。</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    数据统计
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="statsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    系统状态
+                                </div>
+                                <div class="card-body">
+                                    <div class="status-item">
+                                        <span>CPU使用率</span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                                        </div>
+                                    </div>
+                                    <div class="status-item mt-3">
+                                        <span>内存使用率</span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
+                                        </div>
+                                    </div>
+                                    <div class="status-item mt-3">
+                                        <span>存储空间</span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">75%</div>
+                                        </div>
+                                    </div>
+                                    <div class="status-item mt-3">
+                                        <span>网络流量</span>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    最近活动
+                                </div>
+                                <div class="card-body">
+                                    <ul class="activity-list">
+                                        <li><i class="fas fa-user text-primary"></i> 用户登录 <span class="time">10:30</span></li>
+                                        <li><i class="fas fa-file-alt text-success"></i> 文件已上传 <span class="time">09:45</span></li>
+                                        <li><i class="fas fa-tasks text-warning"></i> 任务已完成 <span class="time">昨天</span></li>
+                                        <li><i class="fas fa-comment text-info"></i> 新消息 <span class="time">昨天</span></li>
+                                        <li><i class="fas fa-chart-line text-danger"></i> 报告已生成 <span class="time">2天前</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    快速笔记
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" placeholder="在这里写下你的笔记" id="quickNote" style="height: 150px"></textarea>
+                                        <label for="quickNote">在这里写下你的笔记</label>
+                                    </div>
+                                    <button class="btn btn-primary mt-3" id="saveNote">保存笔记</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 待办事项页面 -->
+            <div class="page-content" id="todo-page" style="display: none;">
+                <div class="container-fluid">
+                    <h2 class="mt-4">待办事项</h2>
+                    <p>管理你的任务和待办事项。</p>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            添加新任务
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="taskInput" placeholder="输入新任务...">
+                                <select class="form-select" id="taskPriority" style="max-width: 150px;">
+                                    <option value="low">低优先级</option>
+                                    <option value="medium" selected>中优先级</option>
+                                    <option value="high">高优先级</option>
+                                </select>
+                                <button class="btn btn-primary" type="button" id="addTaskBtn">添加任务</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            任务列表
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" id="taskTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="true">全部</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="false">进行中</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">已完成</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="taskTabContent">
+                                <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                                    <ul class="list-group mt-3" id="allTasksList">
+                                        <!-- 任务将通过JavaScript动态添加 -->
+                                    </ul>
+                                </div>
+                                <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
+                                    <ul class="list-group mt-3" id="activeTasksList">
+                                        <!-- 任务将通过JavaScript动态添加 -->
+                                    </ul>
+                                </div>
+                                <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                                    <ul class="list-group mt-3" id="completedTasksList">
+                                        <!-- 任务将通过JavaScript动态添加 -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 天气查询页面 -->
+            <div class="page-content" id="weather-page" style="display: none;">
+                <div class="container-fluid">
+                    <h2 class="mt-4">天气查询</h2>
+                    <p>查询全球各地的实时天气信息。</p>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            搜索城市
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="cityInput" placeholder="输入城市名称...">
+                                <button class="btn btn-primary" type="button" id="searchWeatherBtn">查询</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-4" id="weatherCard" style="display: none;">
+                        <div class="card-header">
+                            天气信息
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="weather-main">
+                                        <h3 id="weatherCity">城市名称</h3>
+                                        <div class="weather-icon">
+                                            <img id="weatherIcon" src="" alt="天气图标">
+                                        </div>
+                                        <div class="weather-temp">
+                                            <span id="weatherTemp">--</span>°C
+                                        </div>
+                                        <div class="weather-desc" id="weatherDesc">
+                                            天气描述
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="weather-details">
+                                        <div class="weather-detail-item">
+                                            <i class="fas fa-tint"></i> 湿度: <span id="weatherHumidity">--</span>%
+                                        </div>
+                                        <div class="weather-detail-item">
+                                            <i class="fas fa-wind"></i> 风速: <span id="weatherWind">--</span> m/s
+                                        </div>
+                                        <div class="weather-detail-item">
+                                            <i class="fas fa-compress-arrows-alt"></i> 气压: <span id="weatherPressure">--</span> hPa
+                                        </div>
+                                        <div class="weather-detail-item">
+                                            <i class="fas fa-eye"></i> 能见度: <span id="weatherVisibility">--</span> km
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5>未来5天预报</h5>
+                                    <div class="forecast-container" id="forecastContainer">
+                                        <!-- 天气预报将通过JavaScript动态添加 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 拖放演示页面 -->
+            <div class="page-content" id="drag-drop-page" style="display: none;">
+                <div class="container-fluid">
+                    <h2 class="mt-4">拖放演示</h2>
+                    <p>尝试在不同区域之间拖放项目。</p>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    待处理
+                                </div>
+                                <div class="card-body dropzone" id="todo-zone">
+                                    <div class="draggable-item" draggable="true" data-id="item1">
+                                        <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
+                                        <div class="item-content">设计用户界面</div>
+                                    </div>
+                                    <div class="draggable-item" draggable="true" data-id="item2">
+                                        <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
+                                        <div class="item-content">开发后端API</div>
+                                    </div>
+                                    <div class="draggable-item" draggable="true" data-id="item3">
+                                        <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
+                                        <div class="item-content">编写测试用例</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    进行中
+                                </div>
+                                <div class="card-body dropzone" id="progress-zone">
+                                    <div class="draggable-item" draggable="true" data-id="item4">
+                                        <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
+                                        <div class="item-content">实现用户认证</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    已完成
+                                </div>
+                                <div class="card-body dropzone" id="done-zone">
+                                    <div class="draggable-item" draggable="true" data-id="item5">
+                                        <div class="drag-handle"><i class="fas fa-grip-lines"></i></div>
+                                        <div class="item-content">项目需求分析</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            添加新项目
+                        </div>
+                        <div class="card-body">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="newItemInput" placeholder="输入项目名称...">
+                                <button class="btn btn-primary" type="button" id="addItemBtn">添加项目</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 聊天室页面 -->
+            <div class="page-content" id="chat-page" style="display: none;">
+                <div class="container-fluid">
+                    <h2 class="mt-4">聊天室</h2>
+                    <p>与其他用户实时交流。</p>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            聊天窗口
+                        </div>
+                        <div class="card-body">
+                            <div class="chat-container">
+                                <div class="chat-messages" id="chatMessages">
+                                    <!-- 消息将通过JavaScript动态添加 -->
+                                    <div class="message-item received">
+                                        <div class="message-avatar">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="message-content">
+                                            <div class="message-header">
+                                                <span class="message-author">系统</span>
+                                                <span class="message-time">10:00</span>
+                                            </div>
+                                            <div class="message-text">
+                                                欢迎来到聊天室！
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="chat-input">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="messageInput" placeholder="输入消息...">
+                                        <button class="btn btn-primary" type="button" id="sendMessageBtn">
+                                            <i class="fas fa-paper-plane"></i> 发送
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    在线用户
+                                </div>
+                                <div class="card-body">
+                                    <ul class="user-list" id="onlineUsers">
+                                        <li class="user-item">
+                                            <div class="user-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="user-name">
+                                                用户1
+                                                <span class="user-status online"></span>
+                                            </div>
+                                        </li>
+                                        <li class="user-item">
+                                            <div class="user-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="user-name">
+                                                用户2
+                                                <span class="user-status online"></span>
+                                            </div>
+                                        </li>
+                                        <li class="user-item">
+                                            <div class="user-avatar">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="user-name">
+                                                用户3
+                                                <span class="user-status away"></span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    聊天设置
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="notificationSwitch" checked>
+                                        <label class="form-check-label" for="notificationSwitch">接收通知</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="soundSwitch" checked>
+                                        <label class="form-check-label" for="soundSwitch">声音提醒</label>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label for="usernameInput" class="form-label">修改用户名</label>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" id="usernameInput" placeholder="输入新用户名">
+                                            <button class="btn btn-outline-secondary" type="button" id="changeUsernameBtn">修改</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据可视化页面 -->
+            <div class="page-content" id="visualization-page" style="display: none;">
+                <div class="container-fluid">
+                    <h2 class="mt-4">数据可视化</h2>
+                    <p>交互式数据可视化工具，支持多种图表类型。</p>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            图表类型选择
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="lineChart" value="line" checked>
+                                        <label class="form-check-label" for="lineChart">
+                                            <i class="fas fa-chart-line me-2"></i>折线图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="barChart" value="bar">
+                                        <label class="form-check-label" for="barChart">
+                                            <i class="fas fa-chart-bar me-2"></i>柱形图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="horizontalBarChart" value="horizontalBar">
+                                        <label class="form-check-label" for="horizontalBarChart">
+                                            <i class="fas fa-bars me-2"></i>条形图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="areaChart" value="area">
+                                        <label class="form-check-label" for="areaChart">
+                                            <i class="fas fa-chart-area me-2"></i>堆积面积图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="histogramChart" value="histogram">
+                                        <label class="form-check-label" for="histogramChart">
+                                            <i class="fas fa-signal me-2"></i>直方图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="pieChart" value="pie">
+                                        <label class="form-check-label" for="pieChart">
+                                            <i class="fas fa-chart-pie me-2"></i>饼图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="scatterChart" value="scatter">
+                                        <label class="form-check-label" for="scatterChart">
+                                            <i class="fas fa-braille me-2"></i>散点图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="boxplotChart" value="boxplot">
+                                        <label class="form-check-label" for="boxplotChart">
+                                            <i class="fas fa-box me-2"></i>箱形图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="radarChart" value="radar">
+                                        <label class="form-check-label" for="radarChart">
+                                            <i class="fas fa-spider me-2"></i>雷达图
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="chartType" id="errorbarChart" value="errorbar">
+                                        <label class="form-check-label" for="errorbarChart">
+                                            <i class="fas fa-arrows-alt-v me-2"></i>误差棒图
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    数据输入
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="dataInput" class="form-label">输入数据 (CSV格式或JSON格式)</label>
+                                        <textarea class="form-control" id="dataInput" rows="10" placeholder="X轴数据,Y轴数据1,Y轴数据2,..."></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">或选择示例数据</label>
+                                        <select class="form-select" id="exampleDataSelect">
+                                            <option value="">-- 选择示例数据 --</option>
+                                            <option value="temperature">未来15天最高气温和最低气温</option>
+                                            <option value="alibaba">阿里巴巴淘宝和天猫平台的GMV</option>
+                                            <option value="online">各商品种类的网购替代率</option>
+                                            <option value="logistics">物流公司物流费用统计</option>
+                                            <option value="face">人脸识别的灰度直方图</option>
+                                            <option value="alipay">支付宝月账单报告</option>
+                                            <option value="car">汽车速度与制动距离的关系</option>
+                                            <option value="power">全国发电量统计</option>
+                                            <option value="holland">霍兰德职业兴趣测试</option>
+                                            <option value="root">树种细根生物量</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="chartTitle" class="form-label">图表标题</label>
+                                        <input type="text" class="form-control" id="chartTitle" placeholder="输入图表标题">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="xAxisLabel" class="form-label">X轴标签</label>
+                                        <input type="text" class="form-control" id="xAxisLabel" placeholder="输入X轴标签">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="yAxisLabel" class="form-label">Y轴标签</label>
+                                        <input type="text" class="form-control" id="yAxisLabel" placeholder="输入Y轴标签">
+                                    </div>
+                                    <button class="btn btn-primary" id="generateChartBtn">生成图表</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    图表设置
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">图表颜色主题</label>
+                                        <select class="form-select" id="colorThemeSelect">
+                                            <option value="default">默认</option>
+                                            <option value="pastel">柔和色</option>
+                                            <option value="bright">明亮色</option>
+                                            <option value="dark">暗色</option>
+                                            <option value="colorful">多彩</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="showLegendSwitch" checked>
+                                            <label class="form-check-label" for="showLegendSwitch">显示图例</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="showGridSwitch" checked>
+                                            <label class="form-check-label" for="showGridSwitch">显示网格</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="animationSwitch" checked>
+                                            <label class="form-check-label" for="animationSwitch">启用动画</label>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-secondary" id="updateChartBtn">更新图表</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    图表预览
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height:60vh; width:100%">
+                                        <canvas id="visualizationChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    图表说明
+                                </div>
+                                <div class="card-body">
+                                    <div id="chartDescription">
+                                        <p>请选择图表类型并输入数据，然后点击"生成图表"按钮来创建可视化图表。</p>
+                                        <p>您可以直接输入数据，或者从示例数据中选择一个来快速开始。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 自定义JavaScript -->
+    <script src="js/main.js"></script>
+    <script src="js/todo.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/visualization.js"></script>
+</body>
+</html>
