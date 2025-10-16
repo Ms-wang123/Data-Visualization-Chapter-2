@@ -336,23 +336,46 @@ function initializeChart(type = 'line') {
             break;
             
         case 'boxplot':
-            // 箱形图需要特殊处理
+            // 箱形图替换为分组柱状图显示
+            const boxplotData = chartData.boxplot.data;
+            const boxplotLabels = chartData.boxplot.labels;
+            
+            // 计算每个数据集的统计值（最小值、第一四分位数、中位数、第三四分位数、最大值）
+            const calculateStats = (data) => {
+                const sorted = [...data].sort((a, b) => a - b);
+                const min = Math.min(...data);
+                const max = Math.max(...data);
+                const q1 = sorted[Math.floor(sorted.length * 0.25)];
+                const median = sorted[Math.floor(sorted.length * 0.5)];
+                const q3 = sorted[Math.floor(sorted.length * 0.75)];
+                
+                return { min, q1, median, q3, max };
+            };
+            
+            const stats2018 = calculateStats(boxplotData[0]);
+            const stats2017 = calculateStats(boxplotData[1]);
+            
             currentChart = new Chart(ctx, {
-                type: 'boxplot',
+                type: 'bar',
                 data: {
-                    labels: chartData.boxplot.labels,
-                    datasets: [{
-                        label: '发电量 (亿千瓦时)',
-                        data: chartData.boxplot.data,
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgb(255, 99, 132)',
-                        borderWidth: 1
-                    }]
+                    labels: ['最小值', '第一四分位数', '中位数', '第三四分位数', '最大值'],
+                    datasets: [
+                        {
+                            label: `${boxplotLabels[0]}发电量`,
+                            data: [stats2018.min, stats2018.q1, stats2018.median, stats2018.q3, stats2018.max],
+                            backgroundColor: 'rgba(255, 99, 132, 0.8)'
+                        },
+                        {
+                            label: `${boxplotLabels[1]}发电量`,
+                            data: [stats2017.min, stats2017.q1, stats2017.median, stats2017.q3, stats2017.max],
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     plugins: {
-                        title: { display: true, text: '2017-2018年全国发电量统计' }
+                        title: { display: true, text: '2017-2018年全国发电量统计（箱形图数据展示）' }
                     }
                 }
             });
