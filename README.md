@@ -1,3 +1,7 @@
+# Data-Visualization-1
+数据可视化
+>>>>>>> 03af7a43405fcb7fa3efe74ce3022462f40c5649
+=======
 # 数据可视化仪表板
 
 基于第2章.ipynb的完整数据可视化展示项目，包含10种不同类型的图表展示。
@@ -162,3 +166,7 @@ http://localhost:8000/complete-dashboard.html
 ---
 
 **注意**: 本项目数据均为示例数据，实际应用时请替换为真实数据源。
+=======
+# Data-Visualization-1
+数据可视化
+>>>>>>> 03af7a43405fcb7fa3efe74ce3022462f40c5649
