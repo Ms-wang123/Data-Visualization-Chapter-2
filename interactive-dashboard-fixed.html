@@ -890,7 +890,6 @@
 
                 // 方法
                 const updateChart = () => {
-                    // 图表更新逻辑
                     renderChart();
                 };
 
@@ -900,7 +899,6 @@
                 };
 
                 const updateChartColors = () => {
-                    // 更新图表颜色逻辑
                     updateChart();
                 };
 
@@ -924,7 +922,6 @@
                 };
 
                 const resetData = () => {
-                    // 重置数据逻辑
                     updateDataTable();
                     updateChart();
                 };
@@ -934,11 +931,35 @@
                 };
 
                 const handleFileUpload = (event) => {
-                    // 文件上传处理逻辑
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.labels && data.datasets) {
+                                datasets[selectedChartType.value] = data;
+                                updateDataTable();
+                                renderChart();
+                            }
+                        } catch (error) {
+                            alert('文件格式错误，请上传有效的JSON文件');
+                        }
+                    };
+                    reader.readAsText(file);
+                    event.target.value = '';
                 };
 
                 const exportData = () => {
-                    // 数据导出逻辑
+                    const data = datasets[selectedChartType.value];
+                    const dataStr = JSON.stringify(data, null, 2);
+                    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                    
+                    const link = document.createElement('a');
+                    link.download = `chart-data-${selectedChartType.value}.json`;
+                    link.href = URL.createObjectURL(dataBlob);
+                    link.click();
                 };
 
                 const downloadChart = () => {
@@ -951,34 +972,45 @@
                 };
 
                 const toggleFullscreen = () => {
-                    // 全屏切换逻辑
+                    const chartContainer = document.querySelector('.chart-container');
+                    if (!document.fullscreenElement) {
+                        chartContainer.requestFullscreen().catch(err => {
+                            console.log(`全屏请求错误: ${err.message}`);
+                        });
+                    } else {
+                        document.exitFullscreen();
+                    }
                 };
 
                 const loadCaseStudy = (caseStudy) => {
-                    // 加载案例研究逻辑
+                    const chartMap = {
+                        '电商销售分析': 'line',
+                        '用户行为统计': 'bar',
+                        '产品性能对比': 'radar',
+                        '市场调研数据': 'pie'
+                    };
+                    
+                    selectedChartType.value = chartMap[caseStudy.title] || 'line';
                     activeTab.value = 'dashboard';
-                };
-
-                const updateDataTable = () => {
-                    // 更新数据表格逻辑
+                    
+                    setTimeout(() => {
+                        updateDataTable();
+                        renderChart();
+                    }, 100);
                 };
 
                 const renderChart = () => {
                     const ctx = document.getElementById('chartCanvas').getContext('2d');
                     
-                    // 销毁现有图表
                     if (currentChart.value) {
                         currentChart.value.destroy();
                     }
 
-                    // 获取当前图表配置
                     const chartType = selectedChartType.value;
                     const dataConfig = datasets[chartType];
                     
-                    // 应用颜色主题
                     const colorPalette = colorPalettes.find(c => c.name === selectedColor.value) || colorPalettes[0];
                     
-                    // 图表配置
                     const config = {
                         type: chartType === 'horizontalBar' ? 'bar' : chartType,
                         data: dataConfig,
@@ -1037,7 +1069,6 @@
                         }
                     };
 
-                    // 特殊图表类型处理
                     if (chartType === 'horizontalBar') {
                         config.options.indexAxis = 'y';
                     }
@@ -1052,10 +1083,8 @@
                         };
                     }
 
-                    // 创建新图表
                     currentChart.value = new Chart(ctx, config);
 
-                    // 添加交互事件
                     ctx.canvas.addEventListener('mousemove', (event) => {
                         const rect = ctx.canvas.getBoundingClientRect();
                         const x = event.clientX - rect.left;
@@ -1089,7 +1118,6 @@
                     const chartType = selectedChartType.value;
                     const dataConfig = datasets[chartType];
                     
-                    // 更新表头
                     if (chartType === 'scatter') {
                         currentDataHeaders.value = ['X值', 'Y值'];
                         currentChartData.value = dataConfig.datasets[0].data.map(point => ({
@@ -1115,92 +1143,19 @@
                     }
                 };
 
-                const resetData = () => {
-                    // 重置为原始数据
-                    updateDataTable();
-                    renderChart();
-                };
-
-                const handleFileUpload = (event) => {
-                    const file = event.target.files[0];
-                    if (!file) return;
-                    
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        try {
-                            const data = JSON.parse(e.target.result);
-                            // 处理导入的数据
-                            if (data.labels && data.datasets) {
-                                datasets[selectedChartType.value] = data;
-                                updateDataTable();
-                                renderChart();
-                            }
-                        } catch (error) {
-                            alert('文件格式错误，请上传有效的JSON文件');
-                        }
-                    };
-                    reader.readAsText(file);
-                    event.target.value = ''; // 重置文件输入
-                };
-
-                const exportData = () => {
-                    const data = datasets[selectedChartType.value];
-                    const dataStr = JSON.stringify(data, null, 2);
-                    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-                    
-                    const link = document.createElement('a');
-                    link.download = `chart-data-${selectedChartType.value}.json`;
-                    link.href = URL.createObjectURL(dataBlob);
-                    link.click();
-                };
-
-                const toggleFullscreen = () => {
-                    const chartContainer = document.querySelector('.chart-container');
-                    if (!document.fullscreenElement) {
-                        chartContainer.requestFullscreen().catch(err => {
-                            console.log(`全屏请求错误: ${err.message}`);
-                        });
-                    } else {
-                        document.exitFullscreen();
-                    }
-                };
-
-                const loadCaseStudy = (caseStudy) => {
-                    // 根据案例加载对应的图表类型
-                    const chartMap = {
-                        '电商销售分析': 'line',
-                        '用户行为统计': 'bar',
-                        '产品性能对比': 'radar',
-                        '市场调研数据': 'pie'
-                    };
-                    
-                    selectedChartType.value = chartMap[caseStudy.title] || 'line';
-                    activeTab.value = 'dashboard';
-                    
-                    // 延迟渲染以确保DOM更新完成
-                    setTimeout(() => {
-                        updateDataTable();
-                        renderChart();
-                    }, 100);
-                };
-
-                // 监听图表类型变化
                 watch(selectedChartType, () => {
                     updateDataTable();
                     renderChart();
                 });
 
-                // 监听控制值变化
                 watch(controlValues, () => {
                     renderChart();
                 }, { deep: true });
 
-                // 初始化
                 onMounted(() => {
                     updateDataTable();
                     renderChart();
                     
-                    // 添加键盘快捷键
                     document.addEventListener('keydown', (event) => {
                         if (event.ctrlKey && event.key === 's') {
                             event.preventDefault();
@@ -1237,11 +1192,6 @@
                 };
             }
         }).mount('#app');
-
-        // 图表渲染函数
-        function renderChart() {
-            // 实现图表渲染逻辑
-        }
     </script>
 </body>
 </html>
