@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式数据可视化仪表板 - 第2章</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand h1 {
+            color: #4a5568;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            min-height: 80vh;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .control-item {
+            margin-bottom: 12px;
+        }
+
+        .control-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .control-item input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .control-item select,
+        .control-item input[type="text"],
+        .control-item input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .control-item select:focus,
+        .control-item input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.3s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        /* 图表区域 */
+        .chart-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            flex: 1;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-canvas-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 100% !important;
+        }
+
+        /* 数据表格 */
+        .data-table-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .data-table input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* 案例展示区 */
+        .case-studies {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+        }
+
+        .case-studies h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .case-card {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .case-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .case-card h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .case-card p {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                order: 2;
+            }
+            
+            .chart-area {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .chart-actions {
+                align-self: stretch;
+                justify-content: space-between;
+            }
+            
+            .case-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 动画效果 */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-left: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>📊 交互式数据可视化仪表板</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a class="nav-link" :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">仪表板</a></li>
+                <li><a class="nav-link" :class="{ active: activeTab === 'cases' }" @click="activeTab = 'cases'">案例展示</a></li>
+                <li><a class="nav-link" :class="{ active: activeTab === 'about' }" @click="activeTab = 'about'">关于</a></li>
+            </ul>
+        </nav>
+
+        <!-- 仪表板内容 -->
+        <transition name="fade" mode="out-in">
+            <div v-if="activeTab === 'dashboard'" class="main-content">
+                <!-- 控制面板 -->
+                <div class="control-panel">
+                    <div class="control-group">
+                        <h3>📈 图表类型</h3>
+                        <div class="control-item">
+                            <select v-model="selectedChartType" @change="updateChart">
+                                <option v-for="type in chartTypes" :value="type.id">{{ type.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>🎨 样式设置</h3>
+                        <div class="control-item">
+                            <label>图表颜色:</label>
+                            <div class="color-picker">
+                                <div v-for="color in colorPalettes" 
+                                     :key="color.name"
+                                     class="color-option"
+                                     :style="{ backgroundColor: color.primary }"
+                                     :class="{ active: selectedColor === color.name }"
+                                     @click="selectColor(color.name)"
+                                     :title="color.name"></div>
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <label>点大小: {{ controlValues.pointSize }}</label>
+                            <input type="range" v-model="controlValues.pointSize" min="1" max="10" @input="updateChart">
+                        </div>
+                        <div class="control-item">
+                            <label>动画速度: {{ controlValues.animationSpeed }}ms</label>
+                            <input type="range" v-model="controlValues.animationSpeed" min="100" max="2000" step="100" @input="updateChart">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>📊 数据操作</h3>
+                        <div class="control-item">
+                            <button class="btn" @click="addDataRow">➕ 添加数据行</button>
+                            <button class="btn btn-secondary" @click="resetData">🔄 重置数据</button>
+                        </div>
+                        <div class="control-item">
+                            <button class="btn" @click="importData">📁 导入数据</button>
+                            <button class="btn btn-secondary" @click="exportData">💾 导出数据</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>🔧 高级设置</h3>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.showLegend"> 显示图例
+                            </label>
+                        </div>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.showGrid"> 显示网格
+                            </label>
+                        </div>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.smoothLines"> 平滑线条
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="chart-area">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2 class="chart-title">{{ currentChartTitle }}</h2>
+                            <div class="chart-actions">
+                                <button class="btn" @click="downloadChart">📥 下载图表</button>
+                                <button class="btn btn-secondary" @click="toggleFullscreen">📺 全屏</button>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartCanvas"></canvas>
+                            <div v-if="tooltip.visible" class="tooltip" 
+                                 :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
+                                {{ tooltip.content }}
+                            </div>
+                        </div>
+                        <div class="chart-description">
+                            <p>{{ currentChartDescription }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <div class="data-table-container">
+                        <h3>📋 数据表格</h3>
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th v-for="header in currentDataHeaders" :key="header">{{ header }}</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, index) in currentChartData" :key="index">
+                                        <td v-for="header in currentDataHeaders" :key="header">
+                                            <input type="text" 
+                                                   v-model="row[header]" 
+                                                   @input="updateChartData(index, header, $event.target.value)">
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-secondary" @click="removeDataRow(index)">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 案例展示 -->
+            <div v-else-if="activeTab === 'cases'" class="case-studies">
+                <h2>📚 实际应用场景案例</h2>
+                <div class="case-grid">
+                    <div v-for="caseStudy in caseStudies" :key="caseStudy.id" class="case-card" @click="loadCaseStudy(caseStudy)">
+                        <h3>{{ caseStudy.title }}</h3>
+                        <p>{{ caseStudy.description }}</p>
+                        <div class="case-meta">
+                            <span>图表类型: {{ caseStudy.chartType }}</span>
+                            <span>数据量: {{ caseStudy.dataPoints }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 关于页面 -->
+            <div v-else-if="activeTab === 'about'" class="case-studies">
+                <h2>ℹ️ 关于本项目</h2>
+                <div class="about-content">
+                    <p>这是一个基于第2章数据可视化内容的交互式仪表板，展示了10种不同类型的图表。</p>
+                    <h3>主要功能:</h3>
+                    <ul>
+                        <li>📊 10种图表类型的动态切换</li>
+                        <li>🎨 实时样式和参数调整</li>
+                        <li>📱 响应式设计，支持移动端</li>
+                        <li>💾 数据导入导出功能</li>
+                        <li>🔍 悬停交互和工具提示</li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 文件输入（隐藏） -->
+        <input type="file" id="fileInput" accept=".json,.csv" style="display: none" @change="handleFileUpload">
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed, onMounted, watch } = Vue;
+
+        // 图表类型定义
+        const chartTypes = [
+            { id: 'line', name: '折线图', title: '未来15天最高气温和最低气温', description: '使用plot()绘制折线图展示温度变化趋势' },
+            { id: 'bar', name: '柱形图', title: '2013—2019财年阿里巴巴GMV', description: '使用bar()绘制柱形图展示财务数据' },
+            { id: 'horizontalBar', name: '条形图', title: '各商品种类的网购替代率', description: '使用barh()绘制条形图展示替代率数据' },
+            { id: 'area', name: '堆积面积图', title: '物流公司物流费用统计', description: '使用stackplot()绘制堆积面积图展示费用变化' },
+            { id: 'histogram', name: '直方图', title: '人脸识别的灰度直方图', description: '使用hist()绘制直方图展示数据分布' },
+            { id: 'pie', name: '饼图', title: '支付宝月账单报告', description: '使用pie()绘制饼图或圆环图展示消费占比' },
+            { id: 'scatter', name: '散点图', title: '汽车速度与制动距离的关系', description: '使用scatter()绘制散点图或气泡图展示相关性' },
+            { id: 'boxplot', name: '箱形图', title: '2017年和2018年全国发电量统计', description: '使用boxplot()绘制箱形图展示数据分布' },
+            { id: 'radar', name: '雷达图', title: '霍兰德职业兴趣测试', description: '绘制雷达图展示多维度数据比较' },
+            { id: 'errorbar', name: '误差棒图', title: '树种的细根生物量', description: '使用errorbar()绘制误差棒图展示数据的不确定性' }
+        ];
+
+        // 颜色调色板
+        const colorPalettes = [
+            { name: '默认', primary: '#667eea', secondary: '#764ba2' },
+            { name: '商务', primary: '#3498db', secondary: '#2980b9' },
+            { name: '自然', primary: '#27ae60', secondary: '#2ecc71' },
+            { name: '热情', primary: '#e74c3c', secondary: '#c0392b' },
+            { name: '优雅', primary: '#9b59b6', secondary: '#8e44ad' },
+            { name: '活力', primary: '#f39c12', secondary: '#e67e22' }
+        ];
+
+        // 案例研究数据
+        const caseStudies = [
+            {
+                id: 1,
+                title: '电商销售分析',
+                description: '分析不同商品类别的销售趋势和季节性变化',
+                chartType: '折线图',
+                dataPoints: '1200+'
+            },
+            {
+                id: 2,
+                title: '用户行为统计',
+                description: '展示用户在不同时间段的活跃度和行为模式',
+                chartType: '柱形图',
+                dataPoints: '500+'
+            },
+            {
+                id: 3,
+                title: '产品性能对比',
+                description: '比较不同产品版本的关键性能指标',
+                chartType: '雷达图',
+                dataPoints: '200+'
+            },
+            {
+                id: 4,
+                title: '市场调研数据',
+                description: '可视化市场调研结果和用户偏好分布',
+                chartType: '饼图',
+                dataPoints: '800+'
+            }
+        ];
+
+        // 完整示例数据集
+        const datasets = {
+            line: {
+                labels: ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18'],
+                datasets: [
+                    {
+                        label: '最高气温',
+                        data: [32, 33, 34, 34, 33, 31, 30, 29, 30, 29, 26, 23, 21, 25, 31],
+                        borderColor: '#ff6384',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        fill: false
+                    },
+                    {
+                        label: '最低气温',
+                        data: [19, 19, 20, 22, 22, 21, 22, 16, 18, 18, 17, 14, 15, 16, 16],
+                        borderColor: '#36a2eb',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1,
+                        fill: false
+                    }
+                ]
+            },
+            bar: {
+                labels: ['FY2013', 'FY2014', 'FY2015', 'FY2016', 'FY2017', 'FY2018', 'FY2019'],
+                datasets: [
+                    {
+                        label: '阿里巴巴GMV(亿元)',
+                        data: [10770, 16780, 24440, 30920, 37670, 48200, 57270],
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                            '#9966FF', '#FF9F40', '#8AC249'
+                        ],
+                        borderColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                            '#9966FF', '#FF9F40', '#8AC249'
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+            horizontalBar: {
+                labels: ['家政服务', '飞机票', '家具', '手机', '计算机', '汽车用品', '通信充值', '个人护理', '书报杂志', '餐饮旅游'],
+                datasets: [
+                    {
+                        label: '网购替代率',
+                        data: [0.959, 0.951, 0.935, 0.924, 0.893, 0.892, 0.865, 0.863, 0.860, 0.856],
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#8AC249', '#EA526F', '#6A0572', '#AB83A1'
+                        ],
+                        borderColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#8AC249', '#EA526F', '#6A0572', '#AB83A1'
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+            area: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [
+                    {
+                        label: '公司A',
+                        data: [198, 215, 245, 222, 200, 236, 201, 253, 236, 200, 266, 290],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: true
+                    },
+                    {
+                        label: '公司B',
+                        data: [203, 236, 200, 236, 269, 216, 298, 333, 301, 349, 360, 368],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: true
+                    }
+                ]
+            },
+            histogram: {
+                labels: ['0-10', '10-20', '20-30', '30-40', '40-50', '50-60', '60-70', '70-80', '80-90', '90-100'],
+                datasets: [
+                    {
+                        label: '分数分布',
+                        data: [5, 8, 12, 15, 20, 15, 12, 8, 3, 2],
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#8AC249', '#EA526F', '#6A0572', '#AB83A1'
+                        ],
+                        borderColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#8AC249', '#EA526F', '#6A0572', '#AB83A1'
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+            pie: {
+                labels: ['购物', '人情往来', '餐饮美食', '通信物流', '生活日用', '交通出行', '休闲娱乐', '其他'],
+                datasets: [
+                    {
+                        data: [800, 100, 1000, 200, 300, 200, 200, 200],
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8AC249', '#EA526F'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            scatter: {
+                datasets: [
+                    {
+                        label: '汽车速度与制动距离',
+                        data: [
+                            { x: 10, y: 0.5 },
+                            { x: 20, y: 2.0 },
+                            { x: 30, y: 4.4 },
+                            { x: 40, y: 7.9 },
+                            { x: 50, y: 12.3 },
+                            { x: 60, y: 17.7 },
+                            { x: 70, y: 24.1 },
+                            { x: 80, y: 31.5 },
+                            { x: 90, y: 39.9 },
+                            { x: 100, y: 49.2 },
+                            { x: 110, y: 59.5 },
+                            { x: 120, y: 70.8 },
+                            { x: 130, y: 83.1 },
+                            { x: 140, y: 96.4 },
+                            { x: 150, y: 110.7 },
+                            { x: 160, y: 126.0 },
+                            { x: 170, y: 142.2 },
+                            { x: 180, y: 159.4 },
+                            { x: 190, y: 177.6 },
+                            { x: 200, y: 196.8 }
+                        ],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                    }
+                ]
+            },
+            boxplot: {
+                labels: ['2018年', '2017年'],
+                datasets: [
+                    {
+                        label: '全国发电量统计',
+                        data: [
+                            {
+                                min: 5107.8,
+                                q1: 5254.5,
+                                median: 5443.3,
+                                q3: 5550.6,
+                                max: 6404.9
+                            },
+                            {
+                                min: 4605.2,
+                                q1: 4767.2,
+                                median: 5168.9,
+                                q3: 5219.6,
+                                max: 6047.4
+                            }
+                        ],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            radar: {
+                labels: ['研究型(I)', '艺术型(A)', '社会型(S)', '企业型(E)', '传统型(C)', '现实型(R)'],
+                datasets: [
+                    {
+                        label: '人员1',
+                        data: [0.40, 0.32, 0.35, 0.30, 0.30, 0.88],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
+                    },
+                    {
+                        label: '人员2',
+                        data: [0.85, 0.35, 0.30, 0.40, 0.40, 0.30],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+                    }
+                ]
+            },
+            errorbar: {
+                labels: ['春季', '夏季', '秋季'],
+                datasets: [
+                    {
+                        label: '树种A',
+                        data: [2.04, 1.57, 1.63],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '树种B',
+                        data: [1.69, 1.61, 1.64],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            }
+        };
+
+        createApp({
+            setup() {
+                // 状态管理
+                const activeTab = ref('dashboard');
+                const selectedChartType = ref('line');
+                const selectedColor = ref('默认');
+                const currentChart = ref(null);
+                const tooltip = reactive({
+                    visible: false,
+                    x: 0,
+                    y: 0,
+                    content: ''
+                });
+
+                const controlValues = reactive({
+                    pointSize: 3,
+                    barWidth: 0.5,
+                    innerRadius: 0,
+                    bubbleSize: 5,
+                    animationSpeed: 1000,
+                    showLegend: true,
+                    showGrid: true,
+                    smoothLines: false
+                });
+
+                const currentChartData = ref([]);
+                const currentDataHeaders = ref([]);
+
+                // 计算属性
+                const currentChartTitle = computed(() => {
+                    const chartType = chartTypes.find(c => c.id === selectedChartType.value);
+                    return chartType ? chartType.title : '';
+                });
+
+                const currentChartDescription = computed(() => {
+                    const chartType = chartTypes.find(c => c.id === selectedChartType.value);
+                    return chartType ? chartType.description : '';
+                });
+
+                // 方法
+                const updateChart = () => {
+                    // 图表更新逻辑
+                    renderChart();
+                };
+
+                const selectColor = (colorName) => {
+                    selectedColor.value = colorName;
+                    updateChartColors();
+                };
+
+                const updateChartColors = () => {
+                    // 更新图表颜色逻辑
+                    updateChart();
+                };
+
+                const addDataRow = () => {
+                    const newRow = {};
+                    currentDataHeaders.value.forEach(header => {
+                        newRow[header] = 0;
+                    });
+                    currentChartData.value.push(newRow);
+                    updateChart();
+                };
+
+                const removeDataRow = (index) => {
+                    currentChartData.value.splice(index, 1);
+                    updateChart();
+                };
+
+                const updateChartData = (index, header, value) => {
+                    currentChartData.value[index][header] = value;
+                    updateChart();
+                };
+
+                const resetData = () => {
+                    // 重置数据逻辑
+                    updateDataTable();
+                    updateChart();
+                };
+
+                const importData = () => {
+                    document.getElementById('fileInput').click();
+                };
+
+                const handleFileUpload = (event) => {
+                    // 文件上传处理逻辑
+                };
+
+                const exportData = () => {
+                    // 数据导出逻辑
+                };
+
+                const downloadChart = () => {
+                    if (currentChart.value) {
+                        const link = document.createElement('a');
+                        link.download = 'chart.png';
+                        link.href = currentChart.value.toBase64Image();
+                        link.click();
+                    }
+                };
+
+                const toggleFullscreen = () => {
+                    // 全屏切换逻辑
+                };
+
+                const loadCaseStudy = (caseStudy) => {
+                    // 加载案例研究逻辑
+                    activeTab.value = 'dashboard';
+                };
+
+                const updateDataTable = () => {
+                    // 更新数据表格逻辑
+                };
+
+                const renderChart = () => {
+                    const ctx = document.getElementById('chartCanvas').getContext('2d');
+                    
+                    // 销毁现有图表
+                    if (currentChart.value) {
+                        currentChart.value.destroy();
+                    }
+
+                    // 获取当前图表配置
+                    const chartType = selectedChartType.value;
+                    const dataConfig = datasets[chartType];
+                    
+                    // 应用颜色主题
+                    const colorPalette = colorPalettes.find(c => c.name === selectedColor.value) || colorPalettes[0];
+                    
+                    // 图表配置
+                    const config = {
+                        type: chartType === 'horizontalBar' ? 'bar' : chartType,
+                        data: dataConfig,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: controlValues.animationSpeed
+                            },
+                            plugins: {
+                                legend: {
+                                    display: controlValues.showLegend,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            if (context.parsed.y !== null) {
+                                                label += context.parsed.y;
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    grid: {
+                                        display: controlValues.showGrid
+                                    }
+                                },
+                                y: {
+                                    display: true,
+                                    grid: {
+                                        display: controlValues.showGrid
+                                    }
+                                }
+                            },
+                            elements: {
+                                point: {
+                                    radius: controlValues.pointSize,
+                                    hoverRadius: controlValues.pointSize + 2
+                                },
+                                line: {
+                                    tension: controlValues.smoothLines ? 0.4 : 0
+                                }
+                            }
+                        }
+                    };
+
+                    // 特殊图表类型处理
+                    if (chartType === 'horizontalBar') {
+                        config.options.indexAxis = 'y';
+                    }
+
+                    if (chartType === 'pie') {
+                        config.options.plugins.tooltip.callbacks.label = function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        };
+                    }
+
+                    // 创建新图表
+                    currentChart.value = new Chart(ctx, config);
+
+                    // 添加交互事件
+                    ctx.canvas.addEventListener('mousemove', (event) => {
+                        const rect = ctx.canvas.getBoundingClientRect();
+                        const x = event.clientX - rect.left;
+                        const y = event.clientY - rect.top;
+                        
+                        const points = currentChart.value.getElementsAtEventForMode(
+                            event, 'nearest', { intersect: true }, false
+                        );
+                        
+                        if (points.length > 0) {
+                            const point = points[0];
+                            const dataset = currentChart.value.data.datasets[point.datasetIndex];
+                            const value = dataset.data[point.index];
+                            const label = currentChart.value.data.labels[point.index];
+                            
+                            tooltip.visible = true;
+                            tooltip.x = x + 10;
+                            tooltip.y = y - 10;
+                            tooltip.content = `${label}: ${value}`;
+                        } else {
+                            tooltip.visible = false;
+                        }
+                    });
+                    
+                    ctx.canvas.addEventListener('mouseleave', () => {
+                        tooltip.visible = false;
+                    });
+                };
+
+                const updateDataTable = () => {
+                    const chartType = selectedChartType.value;
+                    const dataConfig = datasets[chartType];
+                    
+                    // 更新表头
+                    if (chartType === 'scatter') {
+                        currentDataHeaders.value = ['X值', 'Y值'];
+                        currentChartData.value = dataConfig.datasets[0].data.map(point => ({
+                            'X值': point.x,
+                            'Y值': point.y
+                        }));
+                    } else if (chartType === 'boxplot') {
+                        currentDataHeaders.value = ['年份', '最小值', 'Q1', '中位数', 'Q3', '最大值'];
+                        currentChartData.value = dataConfig.labels.map((label, index) => ({
+                            '年份': label,
+                            '最小值': dataConfig.datasets[0].data[index].min,
+                            'Q1': dataConfig.datasets[0].data[index].q1,
+                            '中位数': dataConfig.datasets[0].data[index].median,
+                            'Q3': dataConfig.datasets[0].data[index].q3,
+                            '最大值': dataConfig.datasets[0].data[index].max
+                        }));
+                    } else {
+                        currentDataHeaders.value = ['类别', '数值'];
+                        currentChartData.value = dataConfig.labels.map((label, index) => ({
+                            '类别': label,
+                            '数值': dataConfig.datasets[0].data[index]
+                        }));
+                    }
+                };
+
+                const resetData = () => {
+                    // 重置为原始数据
+                    updateDataTable();
+                    renderChart();
+                };
+
+                const handleFileUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            // 处理导入的数据
+                            if (data.labels && data.datasets) {
+                                datasets[selectedChartType.value] = data;
+                                updateDataTable();
+                                renderChart();
+                            }
+                        } catch (error) {
+                            alert('文件格式错误，请上传有效的JSON文件');
+                        }
+                    };
+                    reader.readAsText(file);
+                    event.target.value = ''; // 重置文件输入
+                };
+
+                const exportData = () => {
+                    const data = datasets[selectedChartType.value];
+                    const dataStr = JSON.stringify(data, null, 2);
+                    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                    
+                    const link = document.createElement('a');
+                    link.download = `chart-data-${selectedChartType.value}.json`;
+                    link.href = URL.createObjectURL(dataBlob);
+                    link.click();
+                };
+
+                const toggleFullscreen = () => {
+                    const chartContainer = document.querySelector('.chart-container');
+                    if (!document.fullscreenElement) {
+                        chartContainer.requestFullscreen().catch(err => {
+                            console.log(`全屏请求错误: ${err.message}`);
+                        });
+                    } else {
+                        document.exitFullscreen();
+                    }
+                };
+
+                const loadCaseStudy = (caseStudy) => {
+                    // 根据案例加载对应的图表类型
+                    const chartMap = {
+                        '电商销售分析': 'line',
+                        '用户行为统计': 'bar',
+                        '产品性能对比': 'radar',
+                        '市场调研数据': 'pie'
+                    };
+                    
+                    selectedChartType.value = chartMap[caseStudy.title] || 'line';
+                    activeTab.value = 'dashboard';
+                    
+                    // 延迟渲染以确保DOM更新完成
+                    setTimeout(() => {
+                        updateDataTable();
+                        renderChart();
+                    }, 100);
+                };
+
+                // 监听图表类型变化
+                watch(selectedChartType, () => {
+                    updateDataTable();
+                    renderChart();
+                });
+
+                // 监听控制值变化
+                watch(controlValues, () => {
+                    renderChart();
+                }, { deep: true });
+
+                // 初始化
+                onMounted(() => {
+                    updateDataTable();
+                    renderChart();
+                    
+                    // 添加键盘快捷键
+                    document.addEventListener('keydown', (event) => {
+                        if (event.ctrlKey && event.key === 's') {
+                            event.preventDefault();
+                            downloadChart();
+                        }
+                    });
+                });
+
+                return {
+                    activeTab,
+                    selectedChartType,
+                    selectedColor,
+                    controlValues,
+                    tooltip,
+                    currentChartData,
+                    currentDataHeaders,
+                    currentChartTitle,
+                    currentChartDescription,
+                    chartTypes,
+                    colorPalettes,
+                    caseStudies,
+                    updateChart,
+                    selectColor,
+                    addDataRow,
+                    removeDataRow,
+                    updateChartData,
+                    resetData,
+                    importData,
+                    handleFileUpload,
+                    exportData,
+                    downloadChart,
+                    toggleFullscreen,
+                    loadCaseStudy
+                };
+            }
+        }).mount('#app');
+
+        // 图表渲染函数
+        function renderChart() {
+            // 实现图表渲染逻辑
+        }
+    </script>
+</body>
+</html>
