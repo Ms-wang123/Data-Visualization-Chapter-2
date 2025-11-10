@@ -1083,6 +1083,39 @@
                         };
                     }
 
+                    // 特殊处理箱形图、雷达图、误差棒图
+                    if (chartType === 'boxplot') {
+                        // 箱形图使用条形图显示
+                        config.type = 'bar';
+                        config.data.datasets[0].data = config.data.datasets[0].data.map(item => item.median);
+                    }
+                    
+                    if (chartType === 'radar') {
+                        // 雷达图使用折线图显示
+                        config.type = 'line';
+                        config.data.datasets.forEach(dataset => {
+                            dataset.fill = true;
+                            dataset.tension = 0.1;
+                        });
+                        config.options.scales = {
+                            r: {
+                                beginAtZero: true,
+                                max: 1,
+                                ticks: {
+                                    stepSize: 0.2
+                                }
+                            }
+                        };
+                    }
+                    
+                    if (chartType === 'errorbar') {
+                        // 误差棒图使用条形图显示
+                        config.type = 'bar';
+                        config.data.datasets.forEach(dataset => {
+                            dataset.data = dataset.data;
+                        });
+                    }
+
                     currentChart.value = new Chart(ctx, config);
 
                     ctx.canvas.addEventListener('mousemove', (event) => {
