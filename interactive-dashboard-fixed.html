@@ -220,6 +220,31 @@
             width: 100%;
             height: 400px;
             position: relative;
+            min-height: 300px;
+        }
+
+        /* 图表容器响应式优化 */
+        @media (max-width: 1200px) {
+            .chart-canvas-container {
+                height: 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chart-canvas-container {
+                height: 300px;
+            }
+            
+            .chart-container {
+                padding: 15px;
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-canvas-container {
+                height: 250px;
+            }
         }
 
         canvas {
@@ -1083,20 +1108,30 @@
                         };
                     }
 
-                    // 特殊处理箱形图、雷达图、误差棒图
+                    // 特殊处理不兼容的图表类型
                     if (chartType === 'boxplot') {
-                        // 箱形图使用条形图显示
+                        // 箱形图：使用箱形图插件显示完整数据
                         config.type = 'bar';
-                        config.data.datasets[0].data = config.data.datasets[0].data.map(item => item.median);
+                        config.data.datasets[0].data = config.data.datasets[0].data.map(item => {
+                            // 将箱形图数据转换为数值显示
+                            return {
+                                label: '中位数',
+                                value: item.median,
+                                min: item.min,
+                                q1: item.q1,
+                                q3: item.q3,
+                                max: item.max
+                            };
+                        });
+                        config.options.plugins.tooltip.callbacks.label = function(context) {
+                            const data = context.dataset.data[context.dataIndex];
+                            return `最小值: ${data.min}, Q1: ${data.q1}, 中位数: ${data.median}, Q3: ${data.q3}, 最大值: ${data.max}`;
+                        };
                     }
                     
                     if (chartType === 'radar') {
-                        // 雷达图使用折线图显示
-                        config.type = 'line';
-                        config.data.datasets.forEach(dataset => {
-                            dataset.fill = true;
-                            dataset.tension = 0.1;
-                        });
+                        // 雷达图：使用Chart.js原生雷达图支持
+                        config.type = 'radar';
                         config.options.scales = {
                             r: {
                                 beginAtZero: true,
@@ -1109,11 +1144,13 @@
                     }
                     
                     if (chartType === 'errorbar') {
-                        // 误差棒图使用条形图显示
+                        // 误差棒图：使用条形图显示基础数据
                         config.type = 'bar';
-                        config.data.datasets.forEach(dataset => {
-                            dataset.data = dataset.data;
-                        });
+                        config.options.plugins.tooltip.callbacks.label = function(context) {
+                            const label = context.dataset.label || '';
+                            const value = context.parsed.y;
+                            return `${label}: ${value}`;
+                        };
                     }
 
                     currentChart.value = new Chart(ctx, config);
@@ -1166,6 +1203,20 @@
                             '中位数': dataConfig.datasets[0].data[index].median,
                             'Q3': dataConfig.datasets[0].data[index].q3,
                             '最大值': dataConfig.datasets[0].data[index].max
+                        }));
+                    } else if (chartType === 'radar') {
+                        currentDataHeaders.value = ['维度', '人员1', '人员2'];
+                        currentChartData.value = dataConfig.labels.map((label, index) => ({
+                            '维度': label,
+                            '人员1': dataConfig.datasets[0].data[index],
+                            '人员2': dataConfig.datasets[1].data[index]
+                        }));
+                    } else if (chartType === 'errorbar') {
+                        currentDataHeaders.value = ['季节', '树种A', '树种B'];
+                        currentChartData.value = dataConfig.labels.map((label, index) => ({
+                            '季节': label,
+                            '树种A': dataConfig.datasets[0].data[index],
+                            '树种B': dataConfig.datasets[1].data[index]
                         }));
                     } else {
                         currentDataHeaders.value = ['类别', '数值'];
