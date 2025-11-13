@@ -726,16 +726,29 @@
                     {
                         label: '公司A',
                         data: [198, 215, 245, 222, 200, 236, 201, 253, 236, 200, 266, 290],
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
                         borderColor: 'rgba(255, 99, 132, 1)',
-                        fill: true
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
                     },
                     {
                         label: '公司B',
                         data: [203, 236, 200, 236, 269, 216, 298, 333, 301, 349, 360, 368],
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
                         borderColor: 'rgba(54, 162, 235, 1)',
-                        fill: true
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: '公司C',
+                        data: [185, 205, 226, 199, 238, 200, 250, 209, 246, 219, 253, 288],
+                        backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
                     }
                 ]
             },
@@ -745,15 +758,11 @@
                     {
                         label: '分数分布',
                         data: [5, 8, 12, 15, 20, 15, 12, 8, 3, 2],
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                            '#FF9F40', '#8AC249', '#EA526F', '#6A0572', '#AB83A1'
-                        ],
-                        borderColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                            '#FF9F40', '#8AC249', '#EA526F', '#6A0572', '#AB83A1'
-                        ],
-                        borderWidth: 2
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        categoryPercentage: 0.9,
+                        barPercentage: 0.9
                     }
                 ]
             },
@@ -812,19 +821,35 @@
                                 q1: 5254.5,
                                 median: 5443.3,
                                 q3: 5550.6,
-                                max: 6404.9
+                                max: 6404.9,
+                                // 添加更多统计信息
+                                mean: 5618.9,
+                                outliers: [6000, 6100, 6150],
+                                iqr: 296.1
                             },
                             {
                                 min: 4605.2,
                                 q1: 4767.2,
                                 median: 5168.9,
                                 q3: 5219.6,
-                                max: 6047.4
+                                max: 6047.4,
+                                // 添加更多统计信息
+                                mean: 5274.1,
+                                outliers: [5800, 5900, 5950],
+                                iqr: 452.4
                             }
                         ],
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 2,
+                        outlierColor: 'rgba(255, 206, 86, 1)',
+                        outlierRadius: 4
                     }
                 ]
             },
@@ -859,16 +884,32 @@
                     {
                         label: '树种A',
                         data: [2.04, 1.57, 1.63],
-                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        // 添加误差范围数据
+                        error: [
+                            { plus: 0.15, minus: 0.12 },
+                            { plus: 0.13, minus: 0.10 },
+                            { plus: 0.14, minus: 0.11 }
+                        ],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
                         borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
+                        borderWidth: 2,
+                        errorBarColor: 'rgba(255, 99, 132, 0.8)',
+                        errorBarWidth: 2
                     },
                     {
                         label: '树种B',
                         data: [1.69, 1.61, 1.64],
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        // 添加误差范围数据
+                        error: [
+                            { plus: 0.12, minus: 0.10 },
+                            { plus: 0.11, minus: 0.09 },
+                            { plus: 0.12, minus: 0.10 }
+                        ],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
                         borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
+                        borderWidth: 2,
+                        errorBarColor: 'rgba(54, 162, 235, 0.8)',
+                        errorBarWidth: 2
                     }
                 ]
             }

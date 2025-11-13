@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强型数据可视化仪表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        /* 动画关键帧 */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-brand h1 {
+            color: #4a5568;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: #667eea;
+            transition: width 0.3s;
+        }
+        
+        .nav-link.active::after {
+            width: 80%;
+        }
+        
+        /* 主容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 80px auto 0;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* 控制面板 */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .control-title {
+            font-size: 1.5rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .control-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* 图表容器网格 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-widget {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .chart-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: move;
+        }
+        
+        .widget-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .widget-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .widget-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .widget-btn:hover {
+            opacity: 1;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* 筛选面板 */
+        .filter-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+        
+        select, input {
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* 实时数据面板 */
+        .live-data-panel {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+        }
+        
+        .live-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        
+        .close-modal:hover {
+            opacity: 1;
+        }
+        
+        /* 移动端优化 */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .hamburger:hover {
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: #4a5568;
+            margin: 3px 0;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+        
+        /* 触摸设备优化 */
+        .btn, .widget-btn, select, input {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        /* 响应式断点 */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+            
+            .live-stats {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .main-container {
+                max-width: 95%;
+                padding: 1.5rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 1.5rem;
+            }
+            
+            .control-panel {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+                height: 60px;
+            }
+            
+            .nav-brand h1 {
+                font-size: 1.4rem;
+            }
+            
+            .nav-menu {
+                display: none;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 1rem 0;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                z-index: 999;
+            }
+            
+            .nav-menu.active {
+                display: flex;
+                animation: slideDown 0.3s ease-out;
+            }
+            
+            .nav-link {
+                padding: 1rem 2rem;
+                border-radius: 0;
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+            }
+            
+            .hamburger {
+                display: flex;
+            }
+            
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(-45deg) translate(-5px, 6px);
+            }
+            
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(45deg) translate(-5px, -6px);
+            }
+            
+            .main-container {
+                padding: 1rem;
+                margin-top: 60px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .chart-container {
+                height: 280px;
+            }
+            
+            .control-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .control-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                flex: 1;
+                min-width: 120px;
+                margin: 2px;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-item {
+                width: 100%;
+            }
+            
+            select, input {
+                width: 100%;
+                font-size: 16px; /* 防止iOS缩放 */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.6rem 0.8rem;
+                height: 55px;
+            }
+            
+            .nav-brand h1 {
+                font-size: 1.2rem;
+            }
+            
+            .main-container {
+                padding: 0.8rem;
+                margin-top: 55px;
+            }
+            
+            .chart-container {
+                height: 240px;
+            }
+            
+            .chart-widget {
+                padding: 1rem;
+            }
+            
+            .widget-title {
+                font-size: 1.1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+                min-width: 100px;
+            }
+            
+            .control-panel {
+                padding: 1rem;
+            }
+            
+            .live-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+            
+            .stat-item {
+                padding: 0.8rem;
+            }
+            
+            .filter-panel {
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .chart-container {
+                height: 220px;
+            }
+            
+            .btn {
+                min-width: 90px;
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .live-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 横屏优化 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .main-container {
+                margin-top: 50px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .navbar {
+                height: 50px;
+            }
+        }
+        
+        /* 深色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+                color: #e2e8f0;
+            }
+            
+            .navbar, .control-panel, .chart-widget, .filter-panel {
+                background: rgba(45, 55, 72, 0.95);
+                color: #e2e8f0;
+            }
+            
+            .nav-link {
+                color: #e2e8f0;
+            }
+            
+            .nav-link:hover, .nav-link.active {
+                color: #667eea;
+                background: rgba(102, 126, 234, 0.2);
+            }
+        }
+        
+        /* 性能优化：减少动画对移动设备的影响 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* 触摸菜单样式 */
+        .touch-menu {
+            position: fixed;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 10000;
+            padding: 8px 0;
+            min-width: 150px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        .touch-menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .touch-menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .touch-menu-item:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        /* 额外的动画 */
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .chart-widget {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* 拖拽样式 */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .sortable-chosen {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1>📊 增强型数据可视化仪表板</h1>
+        </div>
+        
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <ul class="nav-menu" id="navMenu">
+            <li><a href="#dashboard" class="nav-link active">仪表板</a></li>
+            <li><a href="#analytics" class="nav-link">数据分析</a></li>
+            <li><a href="#reports" class="nav-link">报表生成</a></li>
+            <li><a href="#settings" class="nav-link">设置</a></li>
+        </ul>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <div class="main-container">
+        <!-- 实时数据面板 -->
+        <div class="live-data-panel">
+            <div class="live-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="liveUsers">1,234</div>
+                    <div class="stat-label">实时用户数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="liveSales">¥45,678</div>
+                    <div class="stat-label">今日销售额</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="liveConversion">3.2%</div>
+                    <div class="stat-label">转化率</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="liveResponse">142ms</div>
+                    <div class="stat-label">平均响应时间</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <div class="control-header">
+                <h2 class="control-title">📈 数据可视化控制面板</h2>
+                <div class="control-actions">
+                    <button class="btn btn-primary" onclick="startLiveUpdate()">
+                        🔄 开始实时更新
+                    </button>
+                    <button class="btn btn-secondary" onclick="randomizeData()">
+                        🎲 随机数据
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetLayout()">
+                        🏗️ 重置布局
+                    </button>
+                    <button class="btn btn-danger" onclick="exportDashboard()">
+                        📥 导出报告
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 筛选面板 -->
+            <div class="filter-panel">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label class="filter-label">时间范围</label>
+                        <select id="timeRange" onchange="applyFilters()">
+                            <option value="today">今日</option>
+                            <option value="week">本周</option>
+                            <option value="month" selected>本月</option>
+                            <option value="quarter">本季度</option>
+                            <option value="year">本年</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label class="filter-label">数据维度</label>
+                        <select id="dataDimension" onchange="applyFilters()">
+                            <option value="sales">销售额</option>
+                            <option value="users">用户数</option>
+                            <option value="conversion">转化率</option>
+                            <option value="revenue">收入</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label class="filter-label">图表类型</label>
+                        <select id="chartType" onchange="updateChart()">
+                            <option value="line">折线图</option>
+                            <option value="bar">柱形图</option>
+                            <option value="horizontalBar">条形图</option>
+                            <option value="area">面积图</option>
+                            <option value="pie">饼图</option>
+                            <option value="scatter">散点图</option>
+                            <option value="radar">雷达图</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label class="filter-label">自动刷新</label>
+                        <select id="autoRefresh" onchange="toggleAutoRefresh()">
+                            <option value="off">关闭</option>
+                            <option value="5s">5秒</option>
+                            <option value="30s">30秒</option>
+                            <option value="1m">1分钟</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 仪表板网格 -->
+        <div class="dashboard-grid" id="dashboardGrid">
+            <!-- 图表组件将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ 仪表板设置</h3>
+                <button class="close-modal" onclick="closeModal('settingsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- 设置内容 -->
+                <p>设置功能正在开发中...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="enhanced-dashboard.js"></script>
+</body>
+</html>

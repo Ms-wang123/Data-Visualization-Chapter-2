@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强型数据可视化仪表板 - 演示版</title>
+    <link rel="stylesheet" href="enhanced-dashboard.html">
+    <style>
+        .demo-header {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .demo-btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .demo-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-header">
+        <h1>🚀 增强型数据可视化仪表板</h1>
+        <p>基于第2章数据可视化项目的完整优化版本</p>
+    </div>
+    
+    <div class="demo-container">
+        <h2>🎯 新增功能特性</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>实时数据更新</h3>
+                <p>支持实时数据统计和动态图表交互，数据自动刷新功能</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>拖拽式布局</h3>
+                <p>用户可自定义仪表板布局，支持组件拖拽排序和布局保存</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>数据钻取筛选</h3>
+                <p>高级数据筛选和钻取功能，支持时间范围和维度筛选</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>响应式设计</h3>
+                <p>完美适配移动端设备，支持触摸手势和移动端优化</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>现代UI设计</h3>
+                <p>玻璃拟态效果、渐变背景和流畅的动画过渡</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>高性能优化</h3>
+                <p>图表懒加载、内存管理和性能优化技术</p>
+            </div>
+        </div>
+        
+        <div class="demo-buttons">
+            <a href="enhanced-dashboard.html" class="demo-btn">🚀 启动增强版仪表板</a>
+            <a href="complete-dashboard.html" class="demo-btn" style="background: #4CAF50;">📊 查看原始版本</a>
+            <button onclick="showInstructions()" class="demo-btn" style="background: #FF9800;">📖 使用说明</button>
+        </div>
+        
+        <h2>📋 技术特性</h2>
+        <ul>
+            <li><strong>实时数据统计面板</strong> - 显示实时用户数、销售额、转化率等关键指标</li>
+            <li><strong>拖拽式组件管理</strong> - 使用Sortable.js实现组件自由拖拽排序</li>
+            <li><strong>数据筛选功能</strong> - 支持时间范围、数据维度等多维度筛选</li>
+            <li><strong>点击钻取交互</strong> - 点击图表数据点可进行详细数据查看</li>
+            <li><strong>移动端优化</strong> - 完美适配手机和平板设备，支持触摸手势</li>
+            <li><strong>全屏模式</strong> - 支持单个图表组件全屏展示</li>
+            <li><strong>布局保存</strong> - 自动保存用户布局偏好到本地存储</li>
+            <li><strong>导出功能</strong> - 支持仪表板状态报告导出</li>
+        </ul>
+    </div>
+    
+    <script>
+        function showInstructions() {
+            alert('📋 使用说明：\n\n' +
+                '1. 点击"启动增强版仪表板"进入主界面\n' +
+                '2. 拖拽组件标题栏可调整组件位置\n' +
+                '3. 点击组件右上角按钮进行刷新、删除、全屏操作\n' +
+                '4. 使用筛选面板设置时间范围和数据维度\n' +
+                '5. 点击图表数据点可进行数据钻取\n' +
+                '6. 移动端支持长按菜单和滑动操作\n' +
+                '\n💡 提示：所有设置会自动保存到本地存储');
+        }
+        
+        // 检测移动设备并显示提示
+        if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+            setTimeout(() => {
+                alert('📱 检测到移动设备，已启用触摸优化功能！\n\n' +
+                    '• 长按组件可显示操作菜单\n' +
+                    '• 支持滑动切换和手势操作\n' +
+                    '• 界面已适配移动端显示');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
