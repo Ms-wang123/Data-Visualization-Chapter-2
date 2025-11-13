@@ -3,14 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据可视化仪表板 - GitHub Pages</title>
-    <script>
-        // 重定向到完整的仪表板页面
-        window.location.href = 'complete-dashboard.html';
-    </script>
+    <title>数据可视化仪表板集 - GitHub Pages</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 40px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .card-description {
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            color: #495057;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .card-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .card-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #4facfe;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .tag.new {
+            background: #28a745;
+        }
+        
+        .tag.enhanced {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>正在跳转到数据可视化仪表板...</p>
-    <p>如果页面没有自动跳转，请 <a href="complete-dashboard.html">点击这里</a></p>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 数据可视化仪表板集</h1>
+            <p>基于第2章数据可视化项目的完整解决方案</p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- 增强版仪表板 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">⚡</div>
+                    <h2 class="card-title">增强版仪表板 <span class="tag new">NEW</span></h2>
+                </div>
+                <p class="card-description">最新优化的增强版本，包含实时数据更新、拖拽布局、数据筛选等高级功能。</p>
+                
+                <ul class="feature-list">
+                    <li>实时数据更新和图表交互</li>
+                    <li>拖拽式组件调整功能</li>
+                    <li>数据筛选和钻取功能</li>
+                    <li>响应式移动端设计</li>
+                    <li>现代化UI界面</li>
+                </ul>
+                
+                <a href="enhanced-dashboard.html" class="card-button">🚀 启动增强版</a>
+                <a href="demo-enhanced-dashboard.html" class="card-button" style="background: #6c757d; margin-top: 10px;">📋 查看演示</a>
+            </div>
+            
+            <!-- 交互式仪表板 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <h2 class="card-title">交互式仪表板 <span class="tag enhanced">增强版</span></h2>
+                </div>
+                <p class="card-description">功能丰富的交互式版本，支持多种图表类型和基础交互功能。</p>
+                
+                <ul class="feature-list">
+                    <li>多种图表类型切换</li>
+                    <li>基础交互功能</li>
+                    <li>响应式设计</li>
+                    <li>图表下载功能</li>
+                    <li>10种可视化类型</li>
+                </ul>
+                
+                <a href="interactive-dashboard-fixed.html" class="card-button">📊 启动交互版</a>
+            </div>
+            
+            <!-- 原始版本 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">📈</div>
+                    <h2 class="card-title">原始版本</h2>
+                </div>
+                <p class="card-description">基础版本仪表板，展示10种不同的数据可视化图表类型。</p>
+                
+                <ul class="feature-list">
+                    <li>10种可视化图表类型</li>
+                    <li>基础图表展示</li>
+                    <li>响应式布局</li>
+                    <li>简洁设计</li>
+                    <li>适合学习参考</li>
+                </ul>
+                
+                <a href="complete-dashboard.html" class="card-button">📈 启动原始版</a>
+            </div>
+            
+            <!-- 高级平台 -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🛠️</div>
+                    <h2 class="card-title">高级平台</h2>
+                </div>
+                <p class="card-description">包含更多功能和组件的完整平台版本。</p>
+                
+                <ul class="feature-list">
+                    <li>更多图表组件</li>
+                    <li>复杂交互功能</li>
+                    <li>完整平台架构</li>
+                    <li>专业级功能</li>
+                    <li>适合企业使用</li>
+                </ul>
+                
+                <a href="advanced-platform/index.html" class="card-button">🛠️ 启动平台版</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>📚 项目地址: <a href="https://github.com/Ms-wang123/Data-Visualization-Chapter-2" target="_blank">GitHub Repository</a></p>
+            <p>📖 详细文档: <a href="enhanced-dashboard-README.md" target="_blank">查看完整说明文档</a></p>
+            <p>💡 最后更新: 2024年12月 | 基于第2章数据可视化项目</p>
+        </div>
+    </div>
 </body>
 </html>
