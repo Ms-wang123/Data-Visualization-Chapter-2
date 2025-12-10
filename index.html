@@ -2,9 +2,15 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数据可视化仪表板集 - GitHub Pages</title>
+    <title>数据可视化仪表板 - 第2章图表完整展示</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <style>
+        @charset "UTF-8";
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,260 +18,864 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Microsoft YaHei", "SimHei", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
-            color: white;
+            color: #333;
+            line-height: 1.6;
         }
-        
+
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 头部样式 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        /* 图表选择器 */
+        .chart-selector {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            color: #333;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 40px;
+
+        .selector-title {
+            font-size: 1.3rem;
+            color: #4a5568;
+            margin-bottom: 20px;
             text-align: center;
+            font-weight: 600;
         }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 300;
-        }
-        
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .dashboard-grid {
+
+        .chart-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            padding: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
-        
-        .dashboard-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid #e9ecef;
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .card-icon {
-            font-size: 2.5rem;
-            margin-right: 15px;
-        }
-        
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        .card-description {
-            color: #6c757d;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-        
-        .feature-list {
-            list-style: none;
-            margin-bottom: 25px;
-        }
-        
-        .feature-list li {
-            padding: 8px 0;
-            color: #495057;
-            display: flex;
-            align-items: center;
-        }
-        
-        .feature-list li:before {
-            content: "✓";
-            color: #28a745;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        
-        .card-button {
-            display: inline-block;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+
+        .chart-btn {
+            padding: 15px 20px;
             border: none;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-        }
-        
-        .card-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
-        }
-        
-        .tag {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #4facfe;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-radius: 20px;
-            font-size: 0.8rem;
             font-weight: 600;
-            margin-left: 10px;
-        }
-        
-        .tag.new {
-            background: #28a745;
-        }
-        
-        .tag.enhanced {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .footer {
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-align: center;
-            padding: 30px;
-            background: #f8f9fa;
-            color: #6c757d;
-            border-top: 1px solid #e9ecef;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
-        
+
+        .chart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .chart-btn.active {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            transform: translateY(-2px);
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            min-height: 500px;
+        }
+
+        .chart-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            font-size: 1.8rem;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .chart-description {
+            color: #718096;
+            font-size: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .chart-canvas {
+            position: relative;
+            height: 450px;
+            width: 100%;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .control-title {
+            font-size: 1.3rem;
+            color: #4a5568;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            text-align: center;
+        }
+
+        .control-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .control-item button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .control-item button:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        /* 响应式设计 */
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-                padding: 20px;
-                gap: 20px;
+            .container {
+                padding: 10px;
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
             
-            .header p {
-                font-size: 1rem;
+            .chart-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
+            
+            .chart-canvas {
+                height: 350px;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-left: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 成功消息 */
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            border: 1px solid #9ae6b4;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            border: 1px solid #fc8181;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- 头部 -->
         <div class="header">
-            <h1>🚀 数据可视化仪表板集</h1>
-            <p>基于第2章数据可视化项目的完整解决方案</p>
+            <h1>📊 数据可视化仪表板</h1>
+            <p>基于第2章matplotlib图表的完整交互式展示</p>
         </div>
-        
-        <div class="dashboard-grid">
-            <!-- 增强版仪表板 -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-icon">⚡</div>
-                    <h2 class="card-title">增强版仪表板 <span class="tag new">NEW</span></h2>
-                </div>
-                <p class="card-description">最新优化的增强版本，包含实时数据更新、拖拽布局、数据筛选等高级功能。</p>
-                
-                <ul class="feature-list">
-                    <li>实时数据更新和图表交互</li>
-                    <li>拖拽式组件调整功能</li>
-                    <li>数据筛选和钻取功能</li>
-                    <li>响应式移动端设计</li>
-                    <li>现代化UI界面</li>
-                </ul>
-                
-                <a href="enhanced-dashboard.html" class="card-button">🚀 启动增强版</a>
-                <a href="demo-enhanced-dashboard.html" class="card-button" style="background: #6c757d; margin-top: 10px;">📋 查看演示</a>
-            </div>
-            
-            <!-- 交互式仪表板 -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-icon">📊</div>
-                    <h2 class="card-title">交互式仪表板 <span class="tag enhanced">增强版</span></h2>
-                </div>
-                <p class="card-description">功能丰富的交互式版本，支持多种图表类型和基础交互功能。</p>
-                
-                <ul class="feature-list">
-                    <li>多种图表类型切换</li>
-                    <li>基础交互功能</li>
-                    <li>响应式设计</li>
-                    <li>图表下载功能</li>
-                    <li>10种可视化类型</li>
-                </ul>
-                
-                <a href="interactive-dashboard-fixed.html" class="card-button">📊 启动交互版</a>
-            </div>
-            
-            <!-- 原始版本 -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-icon">📈</div>
-                    <h2 class="card-title">原始版本</h2>
-                </div>
-                <p class="card-description">基础版本仪表板，展示10种不同的数据可视化图表类型。</p>
-                
-                <ul class="feature-list">
-                    <li>10种可视化图表类型</li>
-                    <li>基础图表展示</li>
-                    <li>响应式布局</li>
-                    <li>简洁设计</li>
-                    <li>适合学习参考</li>
-                </ul>
-                
-                <a href="complete-dashboard.html" class="card-button">📈 启动原始版</a>
-            </div>
-            
-            <!-- 高级平台 -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <div class="card-icon">🛠️</div>
-                    <h2 class="card-title">高级平台</h2>
-                </div>
-                <p class="card-description">包含更多功能和组件的完整平台版本。</p>
-                
-                <ul class="feature-list">
-                    <li>更多图表组件</li>
-                    <li>复杂交互功能</li>
-                    <li>完整平台架构</li>
-                    <li>专业级功能</li>
-                    <li>适合企业使用</li>
-                </ul>
-                
-                <a href="advanced-platform/index.html" class="card-button">🛠️ 启动平台版</a>
+
+        <!-- 图表选择器 -->
+        <div class="chart-selector">
+            <h2 class="selector-title">选择图表类型</h2>
+            <div class="chart-buttons">
+                <button class="chart-btn active" data-chart="line">📈 折线图</button>
+                <button class="chart-btn" data-chart="bar">📊 柱形图</button>
+                <button class="chart-btn" data-chart="horizontalBar">📉 条形图</button>
+                <button class="chart-btn" data-chart="area">📈 堆积面积图</button>
+                <button class="chart-btn" data-chart="histogram">📊 直方图</button>
+                <button class="chart-btn" data-chart="pie">🥧 饼图</button>
+                <button class="chart-btn" data-chart="scatter">🔵 散点图</button>
+                <button class="chart-btn" data-chart="boxplot">📦 箱形图</button>
+                <button class="chart-btn" data-chart="radar">🎯 雷达图</button>
+                <button class="chart-btn" data-chart="errorbar">📏 误差棒图</button>
             </div>
         </div>
-        
-        <div class="footer">
-            <p>📚 项目地址: <a href="https://github.com/Ms-wang123/Data-Visualization-Chapter-2" target="_blank">GitHub Repository</a></p>
-            <p>📖 详细文档: <a href="enhanced-dashboard-README.md" target="_blank">查看完整说明文档</a></p>
-            <p>💡 最后更新: 2024年12月 | 基于第2章数据可视化项目</p>
+
+        <!-- 图表容器 -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title" id="chartTitle">未来15天最高气温和最低气温</h2>
+                <p class="chart-description" id="chartDescription">使用plot()绘制折线图展示温度变化趋势</p>
+            </div>
+            <div class="chart-canvas">
+                <canvas id="myChart"></canvas>
+            </div>
         </div>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <h3 class="control-title">图表控制</h3>
+            <div class="control-group">
+                <div class="control-item">
+                    <button onclick="resetChart()">🔄 重置图表</button>
+                    <button onclick="downloadChart()">💾 下载图表</button>
+                </div>
+                <div class="control-item">
+                    <button onclick="toggleAnimation()">🎬 切换动画</button>
+                    <button onclick="randomizeData()">🎲 随机数据</button>
+                </div>
+                <div class="control-item">
+                    <button onclick="showData()">📋 显示数据</button>
+                    <button onclick="showCode()">📝 查看代码</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 消息显示区域 -->
+        <div id="messageArea"></div>
     </div>
+
+    <script>
+        // 图表数据集
+        const chartData = {
+            line: {
+                title: '未来15天最高气温和最低气温',
+                description: '使用plot()绘制折线图展示温度变化趋势',
+                labels: ['4日', '5日', '6日', '7日', '8日', '9日', '10日', '11日', '12日', '13日', '14日', '15日', '16日', '17日', '18日'],
+                datasets: [
+                    {
+                        label: '最高气温(°C)',
+                        data: [32, 33, 34, 34, 33, 31, 30, 29, 30, 29, 26, 23, 21, 25, 31],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        borderWidth: 3
+                    },
+                    {
+                        label: '最低气温(°C)',
+                        data: [19, 19, 20, 22, 22, 21, 22, 16, 18, 18, 17, 14, 15, 16, 16],
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1,
+                        borderWidth: 3
+                    }
+                ]
+            },
+            bar: {
+                title: '2013—2019财年阿里巴巴淘宝和天猫平台的GMV',
+                description: '使用bar()绘制柱形图展示财务数据增长趋势',
+                labels: ['FY2013', 'FY2014', 'FY2015', 'FY2016', 'FY2017', 'FY2018', 'FY2019'],
+                datasets: [
+                    {
+                        label: 'GMV(亿元)',
+                        data: [10770, 16780, 24440, 30920, 37670, 48200, 57270],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(46, 204, 113, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 206, 86)',
+                            'rgb(75, 192, 192)',
+                            'rgb(153, 102, 255)',
+                            'rgb(255, 159, 64)',
+                            'rgb(46, 204, 113)'
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+            horizontalBar: {
+                title: '各商品种类的网购替代率',
+                description: '使用barh()绘制条形图展示不同商品类别的网购替代率',
+                labels: ['家政服务', '飞机票', '家具', '手机', '计算机', '汽车用品', '通信充值', '个人护理', '书报杂志', '餐饮旅游'],
+                datasets: [
+                    {
+                        label: '网购替代率',
+                        data: [0.959, 0.951, 0.935, 0.924, 0.893, 0.892, 0.865, 0.863, 0.860, 0.856],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(231, 76, 60, 0.7)',
+                            'rgba(241, 196, 15, 0.7)',
+                            'rgba(52, 73, 94, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 206, 86)',
+                            'rgb(75, 192, 192)',
+                            'rgb(153, 102, 255)',
+                            'rgb(255, 159, 64)',
+                            'rgb(46, 204, 113)',
+                            'rgb(231, 76, 60)',
+                            'rgb(241, 196, 15)',
+                            'rgb(52, 73, 94)'
+                        ],
+                        borderWidth: 2
+                    }
+                ]
+            },
+            area: {
+                title: '物流公司物流费用统计',
+                description: '使用stackplot()绘制堆积面积图展示三家物流公司的费用变化',
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [
+                    {
+                        label: '公司A',
+                        data: [198, 215, 245, 222, 200, 236, 201, 253, 236, 200, 266, 290],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: '公司B',
+                        data: [203, 236, 200, 236, 269, 216, 298, 333, 301, 349, 360, 368],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: '公司C',
+                        data: [185, 205, 226, 199, 238, 200, 250, 209, 246, 219, 253, 288],
+                        backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                        borderColor: 'rgb(255, 206, 86)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            histogram: {
+                title: '人脸识别的灰度直方图',
+                description: '使用hist()绘制直方图展示图像灰度值分布',
+                labels: ['0-50', '50-100', '100-150', '150-200', '200-250', '250-300', '300-350', '350-400', '400-450', '450-500'],
+                datasets: [
+                    {
+                        label: '像素数量',
+                        data: [1250, 2340, 3456, 4567, 5678, 4321, 3210, 2109, 1234, 567],
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            pie: {
+                title: '支付宝月账单报告',
+                description: '使用pie()绘制饼图展示月度消费分类占比',
+                labels: ['购物', '人情往来', '餐饮美食', '通信物流', '生活日用', '交通出行', '休闲娱乐', '其他'],
+                datasets: [
+                    {
+                        data: [800, 100, 1000, 200, 300, 200, 200, 200],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(46, 204, 113, 0.8)',
+                            'rgba(52, 73, 94, 0.8)'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 3
+                    }
+                ]
+            },
+            scatter: {
+                title: '汽车速度与制动距离的关系',
+                description: '使用scatter()绘制散点图展示速度与制动距离的相关性',
+                datasets: [
+                    {
+                        label: '测试数据',
+                        data: [
+                            {x: 10, y: 0.5},
+                            {x: 20, y: 2.0},
+                            {x: 30, y: 4.4},
+                            {x: 40, y: 7.9},
+                            {x: 50, y: 12.3},
+                            {x: 60, y: 17.7},
+                            {x: 70, y: 24.1},
+                            {x: 80, y: 31.5},
+                            {x: 90, y: 39.9},
+                            {x: 100, y: 49.2},
+                            {x: 110, y: 59.5},
+                            {x: 120, y: 70.8},
+                            {x: 130, y: 83.1},
+                            {x: 140, y: 96.4},
+                            {x: 150, y: 110.7},
+                            {x: 160, y: 126.0},
+                            {x: 170, y: 142.2},
+                            {x: 180, y: 159.4},
+                            {x: 190, y: 177.6},
+                            {x: 200, y: 196.8}
+                        ],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }
+                ]
+            },
+            boxplot: {
+                title: '2017年和2018年全国发电量统计',
+                description: '使用boxplot()绘制箱形图展示两年发电量的分布情况',
+                labels: ['2018年', '2017年'],
+                datasets: [
+                    {
+                        label: '发电量(亿千瓦时)',
+                        data: [
+                            [5200, 5254.5, 5283.4, 5443.3, 6404.9],
+                            [4605.2, 4767.2, 5168.9, 5219.6, 6047.4]
+                        ],
+                        backgroundColor: ['rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 132, 0.6)'],
+                        borderColor: ['rgb(54, 162, 235)', 'rgb(255, 99, 132)'],
+                        borderWidth: 2
+                    }
+                ]
+            },
+            radar: {
+                title: '霍兰德职业兴趣测试',
+                description: '绘制雷达图展示六个维度的职业兴趣分布',
+                labels: ['研究型(I)', '艺术型(A)', '社会型(S)', '企业型(E)', '传统型(C)', '现实型(R)'],
+                datasets: [
+                    {
+                        label: '测试者A',
+                        data: [0.40, 0.32, 0.35, 0.30, 0.30, 0.88],
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 2
+                    },
+                    {
+                        label: '测试者B',
+                        data: [0.85, 0.35, 0.30, 0.40, 0.40, 0.30],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 2
+                    }
+                ]
+            },
+            errorbar: {
+                title: '4个树种不同季节的细根生物量',
+                description: '使用errorbar()绘制误差棒图展示生物量测量的不确定性',
+                labels: ['春季', '夏季', '秋季'],
+                datasets: [
+                    {
+                        label: '树种A',
+                        data: [2.04, 1.57, 1.63],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 2,
+                        errorBars: [0.16, 0.08, 0.10]
+                    },
+                    {
+                        label: '树种B',
+                        data: [1.69, 1.61, 1.64],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 2,
+                        errorBars: [0.27, 0.14, 0.14]
+                    },
+                    {
+                        label: '树种C',
+                        data: [4.65, 4.99, 4.94],
+                        backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                        borderColor: 'rgb(255, 206, 86)',
+                        borderWidth: 2,
+                        errorBars: [0.34, 0.32, 0.29]
+                    },
+                    {
+                        label: '树种D',
+                        data: [3.39, 2.33, 4.10],
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 2,
+                        errorBars: [0.23, 0.23, 0.39]
+                    }
+                ]
+            }
+        };
+
+        let currentChart = null;
+        let currentChartType = 'line';
+        let animationEnabled = true;
+
+        // 初始化图表
+        function initChart(type = 'line') {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const data = chartData[type];
+            
+            // 更新标题和描述
+            document.getElementById('chartTitle').textContent = data.title;
+            document.getElementById('chartDescription').textContent = data.description;
+            
+            // 销毁现有图表
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
+            // 配置选项
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: animationEnabled ? 1000 : 0
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                family: "'Microsoft YaHei', 'SimHei', sans-serif",
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'index',
+                        intersect: false,
+                        titleFont: {
+                            family: "'Microsoft YaHei', 'SimHei', sans-serif"
+                        },
+                        bodyFont: {
+                            family: "'Microsoft YaHei', 'SimHei', sans-serif"
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            font: {
+                                family: "'Microsoft YaHei', 'SimHei', sans-serif",
+                                size: 12
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            font: {
+                                family: "'Microsoft YaHei', 'SimHei', sans-serif",
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            };
+            
+            // 特殊图表类型的配置
+            let chartConfig = {
+                type: type === 'horizontalBar' ? 'bar' : type,
+                data: data,
+                options: options
+            };
+            
+            // 水平条形图配置
+            if (type === 'horizontalBar') {
+                chartConfig.options.indexAxis = 'y';
+            }
+            
+            // 饼图配置
+            if (type === 'pie') {
+                chartConfig.options.scales = {};
+                chartConfig.options.plugins.tooltip.callbacks = {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = Math.round((value / total) * 100);
+                        return `${label}: ${value}元 (${percentage}%)`;
+                    }
+                };
+            }
+            
+            // 散点图配置
+            if (type === 'scatter') {
+                chartConfig.type = 'scatter';
+            }
+            
+            // 雷达图配置
+            if (type === 'radar') {
+                chartConfig.type = 'radar';
+                chartConfig.options.scales = {
+                    r: {
+                        beginAtZero: true,
+                        max: 1,
+                        ticks: {
+                            font: {
+                                family: "'Microsoft YaHei', 'SimHei', sans-serif",
+                                size: 12
+                            }
+                        },
+                        pointLabels: {
+                            font: {
+                                family: "'Microsoft YaHei', 'SimHei', sans-serif",
+                                size: 14
+                            }
+                        }
+                    }
+                };
+            }
+            
+            // 箱形图模拟（用柱形图代替）
+            if (type === 'boxplot') {
+                chartConfig.type = 'bar';
+                chartConfig.data.datasets = data.datasets.map((dataset, index) => ({
+                    ...dataset,
+                    data: dataset.data.map(values => [
+                        values[0], // min
+                        values[2], // median
+                        values[4]  // max
+                    ])
+                }));
+            }
+            
+            // 误差棒图（用柱形图模拟）
+            if (type === 'errorbar') {
+                chartConfig.type = 'bar';
+                chartConfig.data.datasets = data.datasets;
+                // 添加误差棒的视觉效果
+                chartConfig.options.plugins.tooltip.callbacks = {
+                    label: function(context) {
+                        const label = context.dataset.label || '';
+                        const value = context.parsed.y;
+                        const errorBar = context.dataset.errorBars[context.dataIndex];
+                        return `${label}: ${value} ± ${errorBar}`;
+                    }
+                };
+            }
+            
+            // 创建新图表
+            currentChart = new Chart(ctx, chartConfig);
+            currentChartType = type;
+        }
+
+        // 重置图表
+        function resetChart() {
+            initChart(currentChartType);
+            showMessage('图表已重置', 'success');
+        }
+
+        // 下载图表
+        function downloadChart() {
+            const link = document.createElement('a');
+            link.download = `${currentChartType}-chart.png`;
+            link.href = currentChart.toBase64Image();
+            link.click();
+            showMessage('图表下载成功', 'success');
+        }
+
+        // 切换动画
+        function toggleAnimation() {
+            animationEnabled = !animationEnabled;
+            initChart(currentChartType);
+            showMessage(`动画已${animationEnabled ? '开启' : '关闭'}`, 'success');
+        }
+
+        // 随机数据
+        function randomizeData() {
+            const data = chartData[currentChartType];
+            data.datasets.forEach(dataset => {
+                if (currentChartType === 'scatter') {
+                    dataset.data = dataset.data.map(point => ({
+                        x: point.x,
+                        y: Math.random() * 200
+                    }));
+                } else if (currentChartType === 'pie') {
+                    const total = 3000;
+                    dataset.data = dataset.data.map(() => Math.random() * 500 + 100);
+                } else {
+                    dataset.data = dataset.data.map(() => Math.random() * 100 + 20);
+                }
+            });
+            initChart(currentChartType);
+            showMessage('数据已随机生成', 'success');
+        }
+
+        // 显示数据
+        function showData() {
+            const data = chartData[currentChartType];
+            console.log('图表数据:', data);
+            showMessage('数据已在控制台显示，按F12查看', 'success');
+        }
+
+        // 显示代码
+        function showCode() {
+            const codes = {
+                line: `# 折线图代码示例
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.arange(4, 19)
+y_max = np.array([32, 33, 34, 34, 33, 31, 30, 29, 30, 29, 26, 23, 21, 25, 31])
+y_min = np.array([19, 19, 20, 22, 22, 21, 22, 16, 18, 18, 17, 14, 15, 16, 16])
+
+plt.plot(x, y_max)
+plt.plot(x, y_min)
+plt.show()`,
+                bar: `# 柱形图代码示例
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.arange(1, 8)
+y = np.array([10770, 16780, 24440, 30920, 37670, 48200, 57270])
+
+plt.bar(x, y, tick_label=["FY2013", "FY2014", "FY2015", "FY2016", "FY2017", "FY2018", "FY2019"])
+plt.show()`
+            };
+            
+            const code = codes[currentChartType] || '# 查看第2章Jupyter Notebook获取完整代码';
+            console.log('Python代码:', code);
+            showMessage('代码已在控制台显示，按F12查看', 'success');
+        }
+
+        // 显示消息
+        function showMessage(text, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            const messageClass = type === 'success' ? 'success-message' : 'error-message';
+            messageArea.innerHTML = `<div class="${messageClass}">${text}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 3000);
+        }
+
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化默认图表
+            initChart('line');
+            
+            // 图表按钮点击事件
+            const chartButtons = document.querySelectorAll('.chart-btn');
+            chartButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有active类
+                    chartButtons.forEach(b => b.classList.remove('active'));
+                    // 添加active类到当前按钮
+                    this.classList.add('active');
+                    // 初始化对应图表
+                    const chartType = this.getAttribute('data-chart');
+                    initChart(chartType);
+                });
+            });
+        });
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'r') {
+                event.preventDefault();
+                resetChart();
+            } else if (event.ctrlKey && event.key === 's') {
+                event.preventDefault();
+                downloadChart();
+            } else if (event.ctrlKey && event.key === 'd') {
+                event.preventDefault();
+                showData();
+            }
+        });
+    </script>
 </body>
 </html>

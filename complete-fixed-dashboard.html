@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化仪表板 - 第2章（完整修复版）</title>
+    <link rel="stylesheet" href="styles-fixed.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
+    <script src="charts-implementation.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>📊 数据可视化仪表板 - 第2章（修复版）</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a class="nav-link" :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">仪表板</a></li>
+                <li><a class="nav-link" :class="{ active: activeTab === 'cases' }" @click="activeTab = 'cases'">案例展示</a></li>
+                <li><a class="nav-link" :class="{ active: activeTab === 'about' }" @click="activeTab = 'about'">关于</a></li>
+            </ul>
+        </nav>
+
+        <!-- 仪表板内容 -->
+        <transition name="fade" mode="out-in">
+            <div v-if="activeTab === 'dashboard'" class="main-content">
+                <!-- 控制面板 -->
+                <div class="control-panel">
+                    <div class="control-group">
+                        <h3>📈 图表类型</h3>
+                        <div class="control-item">
+                            <select v-model="selectedChartType" @change="updateChart">
+                                <option v-for="type in chartTypes" :value="type.id">{{ type.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>🎨 样式设置</h3>
+                        <div class="control-item">
+                            <label>图表颜色:</label>
+                            <div class="color-picker">
+                                <div v-for="color in colorPalettes" 
+                                     :key="color.name"
+                                     class="color-option"
+                                     :style="{ backgroundColor: color.primary }"
+                                     :class="{ active: selectedColor === color.name }"
+                                     @click="selectColor(color.name)"
+                                     :title="color.name"></div>
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <label>点大小: {{ controlValues.pointSize }}</label>
+                            <input type="range" v-model="controlValues.pointSize" min="1" max="10" @input="updateChart">
+                        </div>
+                        <div class="control-item">
+                            <label>动画速度: {{ controlValues.animationSpeed }}ms</label>
+                            <input type="range" v-model="controlValues.animationSpeed" min="100" max="2000" step="100" @input="updateChart">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>📊 数据操作</h3>
+                        <div class="control-item">
+                            <button class="btn" @click="addDataRow">➕ 添加数据行</button>
+                            <button class="btn btn-secondary" @click="resetData">🔄 重置数据</button>
+                        </div>
+                        <div class="control-item">
+                            <button class="btn" @click="importData">📁 导入数据</button>
+                            <button class="btn btn-secondary" @click="exportData">💾 导出数据</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>🔧 高级设置</h3>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.showLegend"> 显示图例
+                            </label>
+                        </div>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.showGrid"> 显示网格
+                            </label>
+                        </div>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.smoothLines"> 平滑线条
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="control-group" v-if="errorMessage">
+                        <div class="error-message">
+                            {{ errorMessage }}
+                        </div>
+                    </div>
+
+                    <div class="control-group" v-if="successMessage">
+                        <div class="success-message">
+                            {{ successMessage }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="chart-area">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2 class="chart-title">{{ currentChartTitle }}</h2>
+                            <div class="chart-actions">
+                                <button class="btn" @click="downloadChart">📥 下载图表</button>
+                                <button class="btn btn-secondary" @click="toggleFullscreen">📺 全屏</button>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartCanvas"></canvas>
+                            <div v-if="tooltip.visible" class="tooltip" 
+                                 :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
+                                {{ tooltip.content }}
+                            </div>
+                        </div>
+                        <div class="chart-description">
+                            <p>{{ currentChartDescription }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <div class="data-table-container">
+                        <h3>📋 数据表格</h3>
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th v-for="header in currentDataHeaders" :key="header">{{ header }}</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, index) in currentChartData" :key="index">
+                                        <td v-for="header in currentDataHeaders" :key="header">
+                                            <input type="text" 
+                                                   v-model="row[header]" 
+                                                   @input="updateChartData(index, header, $event.target.value)">
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-secondary" @click="removeDataRow(index)">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 案例展示 -->
+            <div v-else-if="activeTab === 'cases'" class="case-studies">
+                <h2>📚 实际应用场景案例</h2>
+                <div class="case-grid">
+                    <div v-for="caseStudy in caseStudies" :key="caseStudy.id" class="case-card" @click="loadCaseStudy(caseStudy)">
+                        <h3>{{ caseStudy.title }}</h3>
+                        <p>{{ caseStudy.description }}</p>
+                        <div class="case-meta">
+                            <span>图表类型: {{ caseStudy.chartType }}</span>
+                            <span>数据量: {{ caseStudy.dataPoints }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 关于页面 -->
+            <div v-else-if="activeTab === 'about'" class="case-studies">
+                <h2>ℹ️ 关于本项目</h2>
+                <div class="about-content" style="background: white; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <p><strong>项目名称：</strong>数据可视化仪表板 - 第2章（完整修复版）</p>
+                    <br>
+                    <p>这是一个基于第2章《数据可视化》内容的交互式仪表板，展示了10种不同类型的图表。</p>
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: #4a5568;">🔧 修复内容：</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>✅ <strong>修复中文编码问题</strong>：确保所有中文字符正确显示，解决乱码问题</li>
+                        <li>✅ <strong>优化图表渲染</strong>：重写图表创建逻辑，确保10种图表类型都能正确渲染</li>
+                        <li>✅ <strong>增强响应式设计</strong>：优化移动端显示效果，支持各种屏幕尺寸</li>
+                        <li>✅ <strong>完善交互功能</strong>：修复悬停提示、数据编辑等功能</li>
+                        <li>✅ <strong>添加错误处理</strong>：增加完善的错误提示和成功反馈机制</li>
+                        <li>✅ <strong>性能优化</strong>：优化动画效果和渲染性能</li>
+                    </ul>
+
+                    <h3 style="margin: 20px 0 10px 0; color: #4a5568;">📊 支持的图表类型：</h3>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>折线图</strong> - 使用plot()绘制折线图展示温度变化趋势</li>
+                        <li><strong>柱形图</strong> - 使用bar()绘制柱形图展示财务数据</li>
+                        <li><strong>条形图</strong> - 使用barh()绘制条形图展示替代率数据</li>
+                        <li><strong>堆积面积图</strong> - 使用stackplot()绘制堆积面积图展示费用变化</li>
+                        <li><strong>直方图</strong> - 使用hist()绘制直方图展示数据分布</li>
+                        <li><strong>饼图</strong> - 使用pie()绘制饼图展示消费占比</li>
+                        <li><strong>散点图</strong> - 使用scatter()绘制散点图展示相关性</li>
+                        <li><strong>箱形图</strong> - 使用boxplot()绘制箱形图展示数据分布</li>
+                        <li><strong>雷达图</strong> - 绘制雷达图展示多维度数据比较</li>
+                        <li><strong>误差棒图</strong> - 使用errorbar()绘制误差棒图展示数据不确定性</li>
+                    </ol>
+
+                    <h3 style="margin: 20px 0 10px 0; color: #4a5568;">🚀 主要功能：</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li>📊 10种图表类型的动态切换</li>
+                        <li>🎨 实时样式和参数调整</li>
+                        <li>📱 完全响应式设计，支持移动端</li>
+                        <li>💾 数据导入导出功能</li>
+                        <li>🔍 完善的悬停交互和工具提示</li>
+                        <li>📝 实时数据编辑功能</li>
+                        <li>📥 图表下载功能</li>
+                        <li>📺 全屏显示模式</li>
+                    </ul>
+
+                    <h3 style="margin: 20px 0 10px 0; color: #4a5568;">🛠️ 技术栈：</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>前端框架：</strong>Vue 3</li>
+                        <li><strong>图表库：</strong>Chart.js 4.4.1</li>
+                        <li><strong>样式：</strong>原生CSS（完全重写，支持深色模式）</li>
+                        <li><strong>构建工具：</strong>无构建依赖，直接运行</li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 文件输入（隐藏） -->
+        <input type="file" id="fileInput" accept=".json,.csv" style="display: none" @change="handleFileUpload">
+    </div>
+
+    <script src="script-complete-fixed.js"></script>
+</body>
+</html>

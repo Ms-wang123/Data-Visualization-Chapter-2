@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据可视化展示平台 - 第2章</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-brand h1 {
+            color: #4a5568;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            min-height: 80vh;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .control-item {
+            margin-bottom: 12px;
+        }
+
+        .control-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .control-item input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .control-item select,
+        .control-item input[type="text"],
+        .control-item input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .control-item select:focus,
+        .control-item input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.3s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        /* 图表区域 */
+        .chart-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            flex: 1;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .chart-canvas-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: 100% !important;
+        }
+
+        /* 数据表格 */
+        .data-table-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .data-table input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* 案例展示区 */
+        .case-studies {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+        }
+
+        .case-studies h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .case-card {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .case-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .case-card h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .case-card p {
+            color: #718096;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .case-meta {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #a0aec0;
+            display: flex;
+            gap: 15px;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel {
+                order: 2;
+                max-height: none;
+            }
+            
+            .chart-area {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .chart-actions {
+                align-self: stretch;
+                justify-content: space-between;
+            }
+            
+            .case-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #app {
+                padding: 10px;
+            }
+        }
+
+        /* 动画效果 */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-left: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 图表描述 */
+        .chart-description {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            color: #4a5568;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* 错误提示 */
+        .error-message {
+            background: #feb2b2;
+            color: #742a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #e53e3e;
+        }
+
+        /* 成功提示 */
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #38a169;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>📊 数据可视化仪表板 - 第2章</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a class="nav-link" :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">仪表板</a></li>
+                <li><a class="nav-link" :class="{ active: activeTab === 'cases' }" @click="activeTab = 'cases'">案例展示</a></li>
+                <li><a class="nav-link" :class="{ active: activeTab === 'about' }" @click="activeTab = 'about'">关于</a></li>
+            </ul>
+        </nav>
+
+        <!-- 仪表板内容 -->
+        <transition name="fade" mode="out-in">
+            <div v-if="activeTab === 'dashboard'" class="main-content">
+                <!-- 控制面板 -->
+                <div class="control-panel">
+                    <div class="control-group">
+                        <h3>📈 图表类型</h3>
+                        <div class="control-item">
+                            <select v-model="selectedChartType" @change="updateChart">
+                                <option v-for="type in chartTypes" :value="type.id">{{ type.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>🎨 样式设置</h3>
+                        <div class="control-item">
+                            <label>图表颜色:</label>
+                            <div class="color-picker">
+                                <div v-for="color in colorPalettes" 
+                                     :key="color.name"
+                                     class="color-option"
+                                     :style="{ backgroundColor: color.primary }"
+                                     :class="{ active: selectedColor === color.name }"
+                                     @click="selectColor(color.name)"
+                                     :title="color.name"></div>
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <label>点大小: {{ controlValues.pointSize }}</label>
+                            <input type="range" v-model="controlValues.pointSize" min="1" max="10" @input="updateChart">
+                        </div>
+                        <div class="control-item">
+                            <label>动画速度: {{ controlValues.animationSpeed }}ms</label>
+                            <input type="range" v-model="controlValues.animationSpeed" min="100" max="2000" step="100" @input="updateChart">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>📊 数据操作</h3>
+                        <div class="control-item">
+                            <button class="btn" @click="addDataRow">➕ 添加数据行</button>
+                            <button class="btn btn-secondary" @click="resetData">🔄 重置数据</button>
+                        </div>
+                        <div class="control-item">
+                            <button class="btn" @click="importData">📁 导入数据</button>
+                            <button class="btn btn-secondary" @click="exportData">💾 导出数据</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>🔧 高级设置</h3>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.showLegend"> 显示图例
+                            </label>
+                        </div>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.showGrid"> 显示网格
+                            </label>
+                        </div>
+                        <div class="control-item">
+                            <label>
+                                <input type="checkbox" v-model="controlValues.smoothLines"> 平滑线条
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表区域 -->
+                <div class="chart-area">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2 class="chart-title">{{ currentChartTitle }}</h2>
+                            <div class="chart-actions">
+                                <button class="btn" @click="downloadChart">📥 下载图表</button>
+                                <button class="btn btn-secondary" @click="toggleFullscreen">📺 全屏</button>
+                            </div>
+                        </div>
+                        <div class="chart-canvas-container">
+                            <canvas id="chartCanvas"></canvas>
+                            <div v-if="tooltip.visible" class="tooltip" 
+                                 :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
+                                {{ tooltip.content }}
+                            </div>
+                        </div>
+                        <div class="chart-description">
+                            <p>{{ currentChartDescription }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 数据表格 -->
+                    <div class="data-table-container">
+                        <h3>📋 数据表格</h3>
+                        <div class="data-table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th v-for="header in currentDataHeaders" :key="header">{{ header }}</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, index) in currentChartData" :key="index">
+                                        <td v-for="header in currentDataHeaders" :key="header">
+                                            <input type="text" 
+                                                   v-model="row[header]" 
+                                                   @input="updateChartData(index, header, $event.target.value)">
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-secondary" @click="removeDataRow(index)">🗑️</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 案例展示 -->
+            <div v-else-if="activeTab === 'cases'" class="case-studies">
+                <h2>📚 实际应用场景案例</h2>
+                <div class="case-grid">
+                    <div v-for="caseStudy in caseStudies" :key="caseStudy.id" class="case-card" @click="loadCaseStudy(caseStudy)">
+                        <h3>{{ caseStudy.title }}</h3>
+                        <p>{{ caseStudy.description }}</p>
+                        <div class="case-meta">
+                            <span>图表类型: {{ caseStudy.chartType }}</span>
+                            <span>数据量: {{ caseStudy.dataPoints }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 关于页面 -->
+            <div v-else-if="activeTab === 'about'" class="case-studies">
+                <h2>ℹ️ 关于本项目</h2>
+                <div class="about-content">
+                    <p>这是一个基于第2章数据可视化内容的交互式仪表板，展示了10种不同类型的图表。</p>
+                    <h3>主要功能:</h3>
+                    <ul>
+                        <li>📊 10种图表类型的动态切换</li>
+                        <li>🎨 实时样式和参数调整</li>
+                        <li>📱 响应式设计，支持移动端</li>
+                        <li>💾 数据导入导出功能</li>
+                        <li>🔍 悬停交互和工具提示</li>
+                    </ul>
+                    <h3>修复内容:</h3>
+                    <ul>
+                        <li>✅ 修复了中文编码显示问题</li>
+                        <li>✅ 优化了图表渲染性能</li>
+                        <li>✅ 增强了移动端适配</li>
+                        <li>✅ 完善了交互功能</li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 文件输入（隐藏） -->
+        <input type="file" id="fileInput" accept=".json,.csv" style="display: none" @change="handleFileUpload">
+    </div>
+
+    <script src="script-fixed.js"></script>
+</body>
+</html>
